@@ -100,6 +100,7 @@ class ParseRunnable implements Runnable{
                 if(s0.length()>0){
                     makeTaskB(task, s0.split(":"));
                 }
+                task.setDatetime(new Date());
                 udpService.saveObTaskBNew(task,inf);
             }
         }

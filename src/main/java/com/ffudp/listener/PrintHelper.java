@@ -28,16 +28,33 @@ public class PrintHelper implements Runnable{
 
     public void run() {
         try {
-            isr = new InputStreamReader(this.inputStream,"UTF-8");
-            br = new BufferedReader(isr);
-            String inf = null;
-            while ((inf = br.readLine()) != null){
-                if(inf.length()>0){
-                    logger.info(inf);
-                    publishService.publish("Parsing2",inf);
-                    outputStream.write(inf.getBytes());
+            byte[] bytes = new byte[1024];
+            int length;
+            while (true){
+                StringBuilder sb = new StringBuilder();
+                if (((length=inputStream.read(bytes))>1)){
+                    String s = new String(bytes, 0, length,"UTF-8");
+                    sb.append(s);
                 }
+                if(sb.length()>0){
+                    logger.info(sb.toString());
+                    publishService.publish("Parsing2",sb.toString());
+                    outputStream.write(sb.toString().getBytes());
+                }
+                sb.setLength(0);
             }
+
+
+//            isr = new InputStreamReader(this.inputStream,"UTF-8");
+//            br = new BufferedReader(isr);
+//            String inf = null;
+//            while ((inf = br.readLine()) != null){
+//                if(inf.length()>0){
+//                    logger.info(inf);
+//                    publishService.publish("Parsing2",inf);
+//                    outputStream.write(inf.getBytes());
+//                }
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
