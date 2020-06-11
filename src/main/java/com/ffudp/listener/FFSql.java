@@ -2,6 +2,7 @@ package com.ffudp.listener;
 
 import com.ffudp.utils.ConnManager;
 import com.ffudp.utils.Tools;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,8 @@ import java.sql.ResultSet;
  */
 //@Component
 //@Order(value=8)
+@Slf4j
 public class FFSql implements CommandLineRunner {
-    private static Logger _log = LoggerFactory.getLogger(FFSql.class);
 
     @Autowired
     private DataSource dataSource;
@@ -37,7 +38,7 @@ public class FFSql implements CommandLineRunner {
     //通过这种方式也能获取注册服务的信息
     @Override
     public void run(String... args) throws Exception {
-        _log.info("FFSql start2");
+        log.info("FFSql start2");
         onDataChange2();
     }
 
@@ -61,26 +62,26 @@ public class FFSql implements CommandLineRunner {
                     byte[] ssll = new byte[4];//瞬时流量
                     System.arraycopy(bs,3,ssll,0,ssll.length);
                     ByteBuffer bsf = ByteBuffer.wrap(ssll);
-                    _log.info("瞬时流量："+Tools.bytes2Float(ssll));
+                    log.info("瞬时流量："+Tools.bytes2Float(ssll));
                     byte[] sslldw = new byte[2];//瞬时流量单位
                     System.arraycopy(bs,7,sslldw,0,2);
-                    _log.info("瞬时流量单位："+Tools.bytes2Integer(sslldw));
+                    log.info("瞬时流量单位："+Tools.bytes2Integer(sslldw));
                     byte[] total = new byte[8];//总量
                     System.arraycopy(bs,9,total,0,total.length);
-                    _log.info("总量："+Tools.bytes2Double(total));
+                    log.info("总量："+Tools.bytes2Double(total));
                     byte[] zlsw = new byte[2];//总单位
                     System.arraycopy(bs,17,zlsw,0,2);
-                    _log.info("总量单位："+Tools.bytes2Integer(zlsw));
+                    log.info("总量单位："+Tools.bytes2Integer(zlsw));
                     byte[] temp = new byte[4];//温度
                     System.arraycopy(bs,19,temp,0,temp.length);
-                    _log.info("温度："+Tools.bytes2Float(temp));
+                    log.info("温度："+Tools.bytes2Float(temp));
 
                     temp = new byte[4];//压力
                     System.arraycopy(bs,23,temp,0,temp.length);
-                    _log.info("压力："+Tools.bytes2Float(temp));
+                    log.info("压力："+Tools.bytes2Float(temp));
                     temp = new byte[4];//总量
                     System.arraycopy(bs,27,temp,0,temp.length);
-                    _log.info("总量："+Tools.bytes2Float(temp));
+                    log.info("总量："+Tools.bytes2Float(temp));
                 }
             }
         }catch (Exception e){

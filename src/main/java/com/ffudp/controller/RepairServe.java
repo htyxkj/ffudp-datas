@@ -22,10 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 public class RepairServe {
-    private static Logger _log = LoggerFactory.getLogger(RepairServe.class);
-
-
-
     @Autowired
     private UDPDataRepairService service;
 

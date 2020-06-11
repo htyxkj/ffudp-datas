@@ -6,6 +6,7 @@ import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.PkObTask;
 import com.ffudp.dbo.UdpDataInfo;
 import com.ffudp.utils.ConnManager;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class DBInvoke {
-    private static Logger _log = LoggerFactory.getLogger(DBInvoke.class);
     @Autowired
     @Qualifier("baseSource")
     private DataSource dataSource;
@@ -230,7 +231,7 @@ public class DBInvoke {
         Connection conn = null;
         PreparedStatement stmt = null;
         try{
-//            _log.info("写日志："+ JSONObject.toJSONString(info).toString());
+//            log.info("写日志："+ JSONObject.toJSONString(info).toString());
             conn = pgSource.getConnection();
             String logsql="insert into fflogs (tmid,id,type,typestr,content,gettime,bs) values(?,?,?,?,?,?,?)";
             stmt = conn.prepareStatement(logsql);
@@ -244,8 +245,8 @@ public class DBInvoke {
             stmt.execute();
         }catch (Exception e){
             e.printStackTrace();
-            _log.error("写库失败：：",e);
-            _log.error("写日志："+ JSONObject.toJSONString(info).toString());
+            log.error("写库失败：：",e);
+            log.error("写日志："+ JSONObject.toJSONString(info).toString());
         }finally {
             try {
                 ConnManager.close(conn,stmt,null);
@@ -261,19 +262,19 @@ public class DBInvoke {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try{
-//            _log.info("写日志："+ JSONObject.toJSONString(info).toString());
+//            log.info("写日志："+ JSONObject.toJSONString(info).toString());
             conn = pgSource.getConnection();
             String logsql="select user,password from user";
             stmt = conn.prepareStatement(logsql);
             rs = stmt.executeQuery();
             while (rs.next()){
-                _log.info(rs.getString(1));
-                _log.info(rs.getString(2));
+                log.info(rs.getString(1));
+                log.info(rs.getString(2));
 
             }
         }catch (Exception e){
             e.printStackTrace();
-            _log.error("写库失败：：",e);
+            log.error("写库失败：：",e);
         }finally {
             ConnManager.close(conn,stmt,null);
         }

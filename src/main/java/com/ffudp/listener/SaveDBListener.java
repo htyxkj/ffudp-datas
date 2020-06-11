@@ -5,6 +5,7 @@ import com.ffudp.dao.DBInvoke;
 import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.PkObTask;
 import com.ffudp.utils.Tools;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,8 @@ import java.util.concurrent.TimeUnit;
  * @date :2020-05-29
  */
 @Service
-public class SaveDBListener implements MessageListener {
-    private static Logger _log = LoggerFactory.getLogger(SaveDBListener.class);
+@Slf4j
+public class SaveDBListener implements MessageListener { 
     @Autowired
     @Lazy
     private RedisTemplate redisTemplate;
@@ -50,14 +51,14 @@ public class SaveDBListener implements MessageListener {
             listKey = (List<Object>)redisTemplate.opsForList().range(key0,0,-1);
 
             if(listKey != null) {
-                _log.info("开始保存数据："+key0);
+                log.info("开始保存数据："+key0);
                 List<ObTaskB> listB = new ArrayList<ObTaskB>();
                 for (int i = 0; i < listKey.size(); i++) {
                     ObTaskB tskB = getTaskB(listKey.get(i).toString());
                     if(tskB != null)
                         listB.add(tskB);
                 }
-                _log.info("数据条数："+listB.size());
+                log.info("数据条数："+listB.size());
                 if(listB.size()>0) {
                     invoke.batchSaveObTaskB(listB);
                     redisTemplate.delete(key0);
@@ -90,7 +91,7 @@ public class SaveDBListener implements MessageListener {
                     try {
                         tkid = invoke.getTkidBYsbid(tskB.getSbid()+"");
                     }catch (Exception e){
-                        _log.error("查询任务编码出错！",e);
+                        log.error("查询任务编码出错！",e);
                     }
                     if(tkid == null){
                         tkid = tskB.getSbid()+"_NOTASKID";
@@ -110,7 +111,7 @@ public class SaveDBListener implements MessageListener {
                     try {
                         tkid = invoke.getTkidBYsbid(infoTskB.getSbid()+"");
                     }catch (Exception e){
-                        _log.error("查询任务编码出错！",e);
+                        log.error("查询任务编码出错！",e);
                     }
                     if(tkid == null){
                         tkid = infoTskB.getSbid()+"_NOTASKID";

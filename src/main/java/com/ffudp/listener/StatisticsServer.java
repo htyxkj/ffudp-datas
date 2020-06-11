@@ -1,9 +1,7 @@
 package com.ffudp.listener;
 
 import com.ffudp.msg.PublishService;
-import com.ffudp.serv.UDPDataServiceNew;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -21,9 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 @Component
+@Slf4j
 public class StatisticsServer implements CommandLineRunner {
-
-	private static Logger logger = LoggerFactory.getLogger(StatisticsServer.class);
 
 
 	@Autowired
@@ -66,20 +63,20 @@ public class StatisticsServer implements CommandLineRunner {
 									doReceive(key);
 								}
 							} catch (Exception e) {
-								logger.error("SelectionKey receive exception", e);
+								log.error("SelectionKey receive exception", e);
 								try {
 									if (key != null) {
 										key.cancel();
 										key.channel().close();
 									}
 								} catch (ClosedChannelException cex) {
-									logger.error("Close channel exception", cex);
+									log.error("Close channel exception", cex);
 								}
 							}
 						}
 					}
 				} catch (IOException e) {
-					logger.error("selector.select exception", e);
+					log.error("selector.select exception", e);
 				}
 			}
 		}, 0L, 2L, TimeUnit.MINUTES);

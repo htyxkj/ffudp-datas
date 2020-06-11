@@ -1,5 +1,6 @@
 package com.ffudp.dbo;
 
+import lombok.Data;
 import org.hibernate.annotations.Proxy;
 
 import javax.persistence.*;
@@ -144,5 +145,25 @@ public class ObTaskB  implements Serializable {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    @Override
+    public String toString() {
+        return "ObTaskB{" +
+                "tkid='" + tkid + '\'' +
+                ", speedtime=" + speedtime +
+                ", sbid=" + sbid +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                ", speed=" + speed +
+                ", height=" + height +
+                ", flow=" + flow +
+                ", sumfolw=" + sumfolw +
+                ", temperature=" + temperature +
+                ", pressure=" + pressure +
+                ", effective=" + effective +
+                ", direction='" + direction + '\'' +
+                ", datetime=" + datetime +
+                '}';
     }
 }

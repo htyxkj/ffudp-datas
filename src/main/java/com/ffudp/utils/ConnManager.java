@@ -1,5 +1,6 @@
 package com.ffudp.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,8 +8,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+@Slf4j
 public class ConnManager {
-    static Logger logger = LoggerFactory.getLogger(ConnManager.class);
+
     /**
      * 释放数据库连接
      * @param connection
@@ -19,7 +21,7 @@ public class ConnManager {
             try {
                 connection.close();
             }catch(Exception e){
-                logger.error("释放数据库连接时发生异常!"+ e.getMessage());
+                log.error("释放数据库连接时发生异常!"+ e.getMessage());
             }
         }
     }
@@ -32,7 +34,7 @@ public class ConnManager {
             try {
                 stat.close();
             }catch(Exception e){
-                logger.error("释放数据库连接时发生异常!"+ e.getMessage());
+                log.error("释放数据库连接时发生异常!"+ e.getMessage());
             }
         }
     }
@@ -46,7 +48,7 @@ public class ConnManager {
             try {
                 stat.close();
             }catch(Exception e){
-                logger.error("释放数据库连接时发生异常!"+ e.getMessage());
+                log.error("释放数据库连接时发生异常!"+ e.getMessage());
             }
         }
     }

@@ -1,16 +1,15 @@
 package com.ffudp.listener;
 
 import com.ffudp.msg.PublishService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+@Slf4j
 public class PrintHelperBK implements Runnable{
-    private static Logger logger = LoggerFactory.getLogger(PrintHelperBK.class);
     private InputStream inputStream;
     private OutputStream outputStream;
     private String type;
@@ -35,7 +34,7 @@ public class PrintHelperBK implements Runnable{
                     sb.append(s);
                 }
                 if(sb.length()>0){
-                    logger.info(sb.toString());
+                    log.info(sb.toString());
                     publishService.publish("Parsing2",sb.toString());
                     outputStream.write(sb.toString().getBytes());
                     outputStream.flush();

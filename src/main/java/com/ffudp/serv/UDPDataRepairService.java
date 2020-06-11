@@ -8,6 +8,7 @@ import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.PkObTask;
 import com.ffudp.dbo.UdpDataInfo;
 import com.ffudp.utils.Tools;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * 监听数据服务
  */
+@Slf4j
 @Service
 public class UDPDataRepairService {
-    private static Logger _log = LoggerFactory.getLogger(UDPDataRepairService.class);
+
 //    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Autowired
     private DBInvoke invoke;
@@ -36,12 +38,12 @@ public class UDPDataRepairService {
      */
     public Integer Repair(String tkid) throws Exception{
         int num = 0;
-        _log.info("解析任务源数据："+tkid);
+        log.info("解析任务源数据："+tkid);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         //修复错误GPS
-        _log.info("解析GPS数据");
+        log.info("解析GPS数据");
         List<ObTaskB> noGPSList = invoke.getNoGPS(tkid);
-        _log.info("GPS错误数据条数："+noGPSList.size());
+        log.info("GPS错误数据条数："+noGPSList.size());
         if(noGPSList != null){
             for (int i=0;i<noGPSList.size();i++) {
                 ObTaskB otb = noGPSList.get(i);
@@ -67,9 +69,9 @@ public class UDPDataRepairService {
             invoke.batchSaveObTaskB(noGPSList);
         }
 
-        _log.info("解析传感器数据");
+        log.info("解析传感器数据");
         List<ObTaskB> noDataList = invoke.getNoData(tkid);
-        _log.info("传感器错误数据条数："+noDataList.size());
+        log.info("传感器错误数据条数："+noDataList.size());
         if(noDataList != null){
             for (int i=0;i<noDataList.size();i++) {
                 ObTaskB otb = noDataList.get(i);
@@ -131,8 +133,8 @@ public class UDPDataRepairService {
                 }
             }
         }catch (Exception e){
-            _log.error("解析GPS数据错误",e,s1);
-            _log.error(s1);
+            log.error("解析GPS数据错误",e,s1);
+            log.error(s1);
         }
         return tskB;
     }
@@ -163,8 +165,8 @@ public class UDPDataRepairService {
                 }
             }
         }catch (Exception e){
-            _log.error("解析传感器数据错误",e);
-            _log.error(bytesToHexString(bs));
+            log.error("解析传感器数据错误",e);
+            log.error(bytesToHexString(bs));
         }finally {
             return tkb;
         }
@@ -203,7 +205,7 @@ public class UDPDataRepairService {
             long edT = edDate.getTime();
             List<ObTaskB> obTaskBList = new ArrayList<ObTaskB>();
             List<UdpDataInfo> listInfo = invoke.getUdpDataInfo(stT,edT,Integer.parseInt(sbid));
-            _log.info("数据条数："+listInfo.size());
+            log.info("数据条数："+listInfo.size());
             String kk = "";
             for(int z=0;z<listInfo.size();z++) {
                 UdpDataInfo info = listInfo.get(z);
@@ -238,8 +240,8 @@ public class UDPDataRepairService {
                 if(key.equals(kk)){
                     mptb.put(key,tb);
                 }else{
-                    _log.info("key != kk");
-                    _log.info("数据时间:"+tb.getSpeedtime());
+                    log.info("key != kk");
+                    log.info("数据时间:"+tb.getSpeedtime());
                     if(tb.getSpeedtime() != null) {
                         obTaskBList.add(tb);
                     }
@@ -251,11 +253,11 @@ public class UDPDataRepairService {
                     }
                 }
             }
-            _log.info("需要保存数据："+obTaskBList.size());
+            log.info("需要保存数据："+obTaskBList.size());
             invoke.batchSaveObTaskB(obTaskBList);
         }catch (Exception e){
             e.printStackTrace();
-            _log.error("重新解析数据错误",e);
+            log.error("重新解析数据错误",e);
         }
     }
 }

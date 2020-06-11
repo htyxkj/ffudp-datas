@@ -10,7 +10,8 @@ import com.ffudp.dbo.UdpDataInfo;
 import com.ffudp.listener.SaveDBTask;
 import com.ffudp.msg.PublishService;
 import com.ffudp.utils.Tools;
-import org.slf4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,13 +32,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * 监听数据服务
  */
+@Slf4j
 @Service
 public class UDPDataServiceNew {
     ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-
-
-    private static Logger _log = LoggerFactory.getLogger(UDPDataServiceNew.class);
     @Autowired
     private DBInvoke invoke;
     @Autowired
@@ -115,9 +114,9 @@ public class UDPDataServiceNew {
                         logInfo.typeStr = "OTH";
                         logInfo.strInfo = "OTH:" + type;
                     }
-//                    _log.info("设备编码：" + sbid);
+//                    log.info("设备编码：" + sbid);
 //                    if (cal.getTimeInMillis() - d1 > 1000) {
-//                        _log.info("数据解析完成，时间：" + cal.getTimeInMillis() + "数据时间：" + d1);
+//                        log.info("数据解析完成，时间：" + cal.getTimeInMillis() + "数据时间：" + d1);
 //                    }
 
                     redisTemplate.opsForValue().set(key0,tskB,10, TimeUnit.MINUTES);
@@ -130,17 +129,17 @@ public class UDPDataServiceNew {
                 }
             }else {
                 int k = Tools.getIntValue(bc,offset);
-                _log.info("type="+k);
+                log.info("type="+k);
                 k = Tools.getIntValue(bc,offset+4);
-                _log.info("sbid="+k);
-                _log.info("系统不处理数据>>>>>>数据小于17，数据长度："+len);
+                log.info("sbid="+k);
+                log.info("系统不处理数据>>>>>>数据小于17，数据长度："+len);
             }
         }catch (Exception e){
-            _log.error("解析数据错误",e);
+            log.error("解析数据错误",e);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             e.printStackTrace(new PrintStream(baos));
             String exception = baos.toString();
-            _log.error(exception);
+            log.error(exception);
             e.printStackTrace();
         }
     }
@@ -201,7 +200,7 @@ public class UDPDataServiceNew {
                 redisTemplate.opsForValue().set(logInfo.sbid + "", tskB, 24, TimeUnit.HOURS);
             }
         }catch (Exception e){
-            _log.error("解析GPS数据错误",e,s1);
+            log.error("解析GPS数据错误",e,s1);
             e.printStackTrace();
         }
         return tskB;
@@ -240,7 +239,7 @@ public class UDPDataServiceNew {
                     tskB.setSumflow(zl);
                 }
             } catch (Exception e) {
-                _log.error("error:", e);
+                log.error("error:", e);
                 e.printStackTrace();
             }
         }
@@ -267,8 +266,6 @@ public class UDPDataServiceNew {
             cal.setTimeInMillis(taskB.getSpeedtime().getTime());
 
             String currKey = ICL.CURR_KEY + info.sbid + ICL.DIV_D + Tools.getSplitZu(cal);
-            _log.info(key0);
-            _log.info(currKey);
             synchronized (key0.intern()) {
                 if(!redisTemplate.hasKey(currKey)){
                     SaveDBTask saveDBTask = new SaveDBTask(currKey, invoke, redisTemplate);

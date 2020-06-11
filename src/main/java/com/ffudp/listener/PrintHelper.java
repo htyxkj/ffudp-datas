@@ -1,14 +1,15 @@
 package com.ffudp.listener;
 
+import com.ffudp.dbo.MMSG;
 import com.ffudp.msg.PublishService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Base64;
 
+@Slf4j
 public class PrintHelper implements Runnable{
-    private static Logger logger = LoggerFactory.getLogger(PrintHelper.class);
     private InputStream inputStream;
     private OutputStream outputStream;
     private String type;
@@ -37,9 +38,10 @@ public class PrintHelper implements Runnable{
                     sb.append(s);
                 }
                 if(sb.length()>0){
-                    logger.info(sb.toString());
-                    publishService.publish("Parsing2",sb.toString());
-                    outputStream.write(sb.toString().getBytes());
+                    byte[] bs =Base64.getEncoder().encode(sb.toString().getBytes());
+                    String str = new String(bs);
+                    publishService.publish("Parsing2",str);
+//                    outputStream.write(sb.toString().getBytes());
                 }
                 sb.setLength(0);
             }
@@ -50,7 +52,7 @@ public class PrintHelper implements Runnable{
 //            String inf = null;
 //            while ((inf = br.readLine()) != null){
 //                if(inf.length()>0){
-//                    logger.info(inf);
+//                    log.info(inf);
 //                    publishService.publish("Parsing2",inf);
 //                    outputStream.write(inf.getBytes());
 //                }

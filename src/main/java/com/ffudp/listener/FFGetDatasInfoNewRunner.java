@@ -1,6 +1,7 @@
 package com.ffudp.listener;
 
 import com.ffudp.msg.PublishService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,8 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 @Component
 @Order(value=3)
+@Slf4j
 public class FFGetDatasInfoNewRunner implements CommandLineRunner {
-    private static Logger _log = LoggerFactory.getLogger(FFGetDatasInfoNewRunner.class);
     private ScheduledExecutorService es = Executors.newScheduledThreadPool(1);
 
 
@@ -45,7 +46,7 @@ public class FFGetDatasInfoNewRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        _log.info("FFGetDatasInfoNewRunner start");
+        log.info("FFGetDatasInfoNewRunner start");
         threadPool = Executors.newFixedThreadPool(num);
         new Thread(() -> {
             try {
@@ -57,7 +58,7 @@ public class FFGetDatasInfoNewRunner implements CommandLineRunner {
     }
 
     public void onDataComing() throws Exception {
-        _log.info("启动端口:"+port);
+        log.info("启动端口:"+port);
         try{
             ServerSocket server = new ServerSocket(port);
             //如果使用多线程，那就需要线程池，防止并发过高时创建过多线程耗尽资源
@@ -70,7 +71,7 @@ public class FFGetDatasInfoNewRunner implements CommandLineRunner {
 //            Runnable runnable = new PrintHelper(socket.getInputStream(),"0",publishService,socket.getOutputStream());
 //            es.scheduleWithFixedDelay(runnable, 0L, 2L, TimeUnit.MINUTES);
         }catch (Exception e){
-            _log.error("出错了：",e);
+            log.error("出错了：",e);
         }
 
     }

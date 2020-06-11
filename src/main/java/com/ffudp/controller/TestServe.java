@@ -7,6 +7,7 @@ import com.ffudp.cl.ICL;
 import com.ffudp.dbo.OBItemInfo;
 import com.ffudp.dbo.RtnEntity;
 import com.ffudp.utils.Tools;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,8 @@ import java.util.concurrent.TimeUnit;
  *  DruidConfig,配置了数据库访问监听
  */
 @RestController
+@Slf4j
 public class TestServe {
-    private static Logger _log = LoggerFactory.getLogger(TestServe.class);
-
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -37,13 +37,13 @@ public class TestServe {
 
     @RequestMapping(value = "/ffdata",method = {RequestMethod.POST, RequestMethod.GET},produces = "application/json;charset=utf-8")
     public RtnEntity order(@RequestParam("id")String id) throws Exception {
-        _log.info("获取设备数据Id："+id);
+        log.info("获取设备数据Id："+id);
         RtnEntity rtn = new RtnEntity();
         Calendar calrd = Calendar.getInstance();
         String currKey = ICL.CURR_KEY+id+ICL.DIV_D+ Tools.getSplitZu(calrd);
         String currKey1 = ICL.CURR_KEY+id+ICL.DIV_D+"GT";
         if(redisTemplate.hasKey(currKey1)){
-            _log.info("访问过key:"+currKey1);
+            log.info("访问过key:"+currKey1);
             JSONObject info = (JSONObject) redisTemplate.opsForValue().get(currKey1);
             rtn = JSONObject.parseObject(info.toJSONString(),RtnEntity.class);
             return  rtn;

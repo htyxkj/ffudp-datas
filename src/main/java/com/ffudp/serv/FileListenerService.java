@@ -4,6 +4,7 @@ import com.ffudp.dao.DBInvoke;
 import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.PkObTask;
 import com.ffudp.utils.Tools;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Configuration      //1.主要用于标记配置类，兼备Component的效果。
 @EnableScheduling   // 2.开启定时任务
 public class FileListenerService {
@@ -32,7 +34,7 @@ public class FileListenerService {
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private static SimpleDateFormat sdfymdh = new SimpleDateFormat("yyyyMMddHH");
-    private static Logger _log = LoggerFactory.getLogger(FileListenerService.class);
+
     @Value("${server.ffftpbk}")
     private String monitorBkDir;//ftp 解析后文件存放路径
 
@@ -57,7 +59,7 @@ public class FileListenerService {
 
     public void parsingFile(File file)  {
         String fileName = file.getName();
-        _log.info("解析文件:"+fileName);
+        log.info("解析文件:"+fileName);
         String sbid = fileName.split("_")[0];
         String s = null;
         String time1= "";
@@ -149,8 +151,8 @@ public class FileListenerService {
                         }
                     }
                 }catch (Exception e){
-                    _log.error("断点续传文件解析失败,文件名称："+fileName+"，数据："+s);
-                    _log.error("错误信息：",e);
+                    log.error("断点续传文件解析失败,文件名称："+fileName+"，数据："+s);
+                    log.error("错误信息：",e);
                 }
             }
             br.close();
@@ -165,8 +167,8 @@ public class FileListenerService {
             File toFile = new File(toRoot+fileName);
             file.renameTo(toFile);
         }catch (Exception e){
-            _log.error("断点续传文件解析失败,文件名称："+fileName);
-            _log.error("错误信息：",e);
+            log.error("断点续传文件解析失败,文件名称："+fileName);
+            log.error("错误信息：",e);
         }
     }
 
@@ -208,7 +210,7 @@ public class FileListenerService {
                 tkid = sbid+"_NOTASKID";
         }catch (Exception e){
             e.printStackTrace();
-            _log.error("断点文件查询任务编码出错");
+            log.error("断点文件查询任务编码出错");
             tkid = sbid+"_NOTASKID";
         }finally {
             return tkid;
