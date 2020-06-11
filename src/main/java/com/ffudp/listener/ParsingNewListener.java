@@ -4,7 +4,6 @@ import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.ffudp.cl.ICL;
 import com.ffudp.dao.DBInvoke;
-import com.ffudp.dbo.MMSG;
 import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.UdpDataInfo;
 import com.ffudp.serv.UDPDataServiceNew;
@@ -16,10 +15,6 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import sun.util.resources.cldr.lag.CalendarData_lag_TZ;
-
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -57,7 +52,7 @@ public class ParsingNewListener implements MessageListener {
                 inf = inf.substring(1, inf.length()-1);
                 byte[] cc  = Base64.getDecoder().decode(inf.getBytes());
                 inf = new String(cc);
-                log.info("获取到数据:"+inf);
+//                log.info("获取到数据:"+inf);
                 synchronized (inf.intern()) {
                     if (inf.length() > 0) {
                         Runnable runnable = new ParseRunnable(inf,redisTemplate,invoke);
@@ -87,13 +82,16 @@ class ParseRunnable implements Runnable{
     @Override
     public void run() {
         try {
+            UdpDataInfo info = new UdpDataInfo();
+            info.strInfo = Base64.getEncoder().encodeToString(inf.getBytes());
+            info.typeStr = "OTH";
+            info.strInfo = "OTH";
             int index = inf.indexOf(ICL.DIV_1E);
             while (index !=-1){
                 String str = inf.substring(0,index);
                 if(str.length()<50){
                     break;
                 }
-                UdpDataInfo info = new UdpDataInfo();
                 String s0 = str;
                 int _idx = s0.indexOf(ICL.DIV_1F);
                 int _idx2 = s0.indexOf(ICL.DIV_1F,_idx+1);
@@ -108,7 +106,6 @@ class ParseRunnable implements Runnable{
 
                 String key0 =  sbid+ ICL.DIV_D+d1;//设备编码_数据时间
                 info.sbid = Long.parseLong(sbid);
-                info.strInfo = str;
                 synchronized (key0.intern()) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(d1);
@@ -133,10 +130,13 @@ class ParseRunnable implements Runnable{
                         tskB = makeGPSData(s0,tskB);
                         info.typeStr = "GPS";
                         info.type = 5;
-                    } else if (inf.startsWith("C")) {//传感器 数据
+                    } else if (str.startsWith("C")) {//传感器 数据
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
+                    }else{
+                        info.typeStr = "OTH";
+                        info.strInfo = "OTH";
                     }
                     redisTemplate.opsForValue().set(key0,tskB,10, TimeUnit.MINUTES);
                     if (tskB.getLatitude() != 0 && tskB.getLongitude() != 0) {
@@ -145,16 +145,17 @@ class ParseRunnable implements Runnable{
                     info.tmid = d1;
                     info.speedtime = tskB.getSpeedtime();
                     info.datetime = new Date();
-//                    invoke.insertFFLogData(info);
-                }
-                if(inf.length()>index){
-                    inf = inf.substring(index+1);
-                }
-                index = inf.indexOf(ICL.DIV_1E);
-                if(inf.length()<50){
-                    index =-1;
+
+                    if(inf.length()>index){
+                        inf = inf.substring(index+1);
+                    }
+                    index = inf.indexOf(ICL.DIV_1E);
+                    if(inf.length()<50){
+                        index =-1;
+                    }
                 }
             }
+            invoke.insertFFLogData(info);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -199,13 +200,14 @@ class ParseRunnable implements Runnable{
         byte[] bs = s0.getBytes();
         String str = bytesToHexString(bs);
         int index = str.indexOf("0104");
-        log.info(str);
         if(index>-1){
             str = str.substring(index);
         }
-        log.info("解析传感器数据："+str);
         byte[] bbs = hexStr2Byte(str);
         taskB = getFlowData(taskB,bbs);
+        if(taskB.getSumflow() ==0 ){
+            log.info("解析传感器数据错误，总流量为0 ："+str);
+        }
         return taskB;
     }
 
