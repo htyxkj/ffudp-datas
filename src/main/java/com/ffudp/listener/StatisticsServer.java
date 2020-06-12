@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 @Component
+@Order(value=1)
 @Slf4j
 public class StatisticsServer implements CommandLineRunner {
 
@@ -36,6 +38,7 @@ public class StatisticsServer implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		log.info("启动监听："+port);
 		init();
 	}
 

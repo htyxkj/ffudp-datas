@@ -62,6 +62,7 @@ public class UDPDataServiceNew {
                 logInfo.tmid = d1;
                 String key0 =  sbid+ ICL.DIV_D+d1;//设备编码_数据时间
                 synchronized (key0.intern()) {
+                    log.info(key0);
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(d1);
                     String dmt = Tools.dateToString(cal, true, 8);

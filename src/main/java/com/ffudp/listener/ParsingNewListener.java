@@ -52,7 +52,7 @@ public class ParsingNewListener implements MessageListener {
                 inf = inf.substring(1, inf.length()-1);
                 byte[] cc  = Base64.getDecoder().decode(inf.getBytes());
                 inf = new String(cc);
-//                log.info("获取到数据:"+inf);
+                log.info("获取到数据:"+inf);
                 synchronized (inf.intern()) {
                     if (inf.length() > 0) {
                         Runnable runnable = new ParseRunnable(inf,redisTemplate,invoke);
