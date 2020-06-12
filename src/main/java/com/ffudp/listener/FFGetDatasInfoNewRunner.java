@@ -26,8 +26,8 @@ import java.util.concurrent.ScheduledExecutorService;
  * @author fengzejiang
  *
  */
-@Component
-@Order(value=3)
+//@Component
+//@Order(value=3)
 @Slf4j
 public class FFGetDatasInfoNewRunner implements CommandLineRunner {
     private ScheduledExecutorService es = Executors.newScheduledThreadPool(1);

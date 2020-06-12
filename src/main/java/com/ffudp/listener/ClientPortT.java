@@ -17,8 +17,8 @@ public class ClientPortT {
     public static void main(String[] args) throws Exception {
         String msg = "#IMEI:867935030001654 Time:%s LNG:113.853485E LAT:22.585745N ALT:37.100000 SPEED:0.012347";
         ExecutorService threadPool = Executors.newFixedThreadPool(20);
-        for(int i=0;i<20;i++){
-            Thread.sleep(2000);
+        for(int i=0;i<2000;i++){
+            Thread.sleep(20);
             LocalDateTime nowLocalDate = LocalDateTime.now();
             String time = nowLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             String msg1 = String.format(msg,time);
