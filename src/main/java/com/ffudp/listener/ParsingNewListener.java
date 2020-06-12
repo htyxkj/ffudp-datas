@@ -89,12 +89,12 @@ class ParseRunnable implements Runnable{
             int index = inf.indexOf(ICL.DIV_1E);
             while (index !=-1){
                 String str = inf.substring(0,index);
-                if(str.length()<50){
-                    break;
-                }
                 String s0 = str;
                 int _idx = s0.indexOf(ICL.DIV_1F);
                 int _idx2 = s0.indexOf(ICL.DIV_1F,_idx+1);
+                if(_idx2 == -1){
+                    break;
+                }
                 String strTime = s0.substring(_idx+1,_idx2);//数据时间戳
                 long d1 = Long.parseLong(strTime);//数据时间
                 d1 = d1/1000;
@@ -205,7 +205,8 @@ class ParseRunnable implements Runnable{
         }
         byte[] bbs = hexStr2Byte(str);
         taskB = getFlowData(taskB,bbs);
-        if(taskB.getSumflow() ==0 ){
+        if(taskB.getSumflow() <= 1 || taskB.getFlow() <=0.00001 ){
+            log.info(taskB.toString());
             log.info("解析传感器数据错误，总流量为0 ："+str);
         }
         return taskB;

@@ -53,16 +53,19 @@ public class SaveDBTask implements Runnable{
         try {
             List<Object> listKey = null;
             listKey = (List<Object>)redisTemplate.opsForList().range(currKey,0,-1);
-            log.info("原始数据量："+listKey.size());
+//            log.info("原始数据量："+listKey.size());
             if(listKey != null) {
-                log.info("开始保存数据："+currKey);
+//                log.info("开始保存数据："+currKey);
                 List<ObTaskB> listB = new ArrayList<ObTaskB>();
                 for (int i = 0; i < listKey.size(); i++) {
                     ObTaskB tskB = getTaskB(listKey.get(i).toString());
-                    if(tskB != null)
+                    if(tskB != null) {
                         listB.add(tskB);
+                    }
+                    if(tskB.getSumflow() == 0){
+                        log.info(tskB.toString());
+                    }
                 }
-                log.info("数据条数："+listB.size());
                 if(listB.size()>0) {
                     invoke.batchSaveObTaskB(listB);
                 }

@@ -34,7 +34,7 @@ public class ClientPortT {
 class MulRun implements Runnable{
     private String msg;
     private String name;
-    String host = "127.0.0.1";
+    String host = "211.144.37.205";
     int port = 55685;
     public MulRun(){}
     public MulRun(String name,String msg){

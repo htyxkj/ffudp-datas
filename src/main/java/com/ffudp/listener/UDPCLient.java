@@ -45,7 +45,10 @@ class MutilThread extends Thread{
     @Override
     public void run() {
         try {
-            InetAddress inet = InetAddress.getByName("127.0.0.1");
+//            String  host = "127.0.0.1";
+//    static String  host = "192.168.3.200";
+            String  host = "192.168.3.5";
+            InetAddress inet = InetAddress.getByName(host);
             DatagramSocket ds = new DatagramSocket();
             String d0="01049C0000800000838000AABE4B9E4027800198E441E20000800058F5413A82CF";
             for(int i=0;i<99999;i++){
