@@ -42,7 +42,6 @@ public class FFGetDatasInfoIORunner implements CommandLineRunner {
     @Value("${server.threadNum}")
     private int num;//线程数量
 
-    private ExecutorService threadPool = null;
     @Autowired
     private PublishService publishService;
     @Autowired

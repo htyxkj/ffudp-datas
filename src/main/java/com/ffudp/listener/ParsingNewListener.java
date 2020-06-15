@@ -15,6 +15,8 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -34,15 +36,12 @@ import java.util.concurrent.TimeUnit;
 public class ParsingNewListener implements MessageListener {
     @Autowired
     @Lazy
-    private UDPDataServiceNew udpService;
-    @Autowired
-    @Lazy
     private DBInvoke invoke;
     @Autowired
     @Lazy
     private RedisTemplate redisTemplate;
 
-    ExecutorService threadPool = Executors.newFixedThreadPool(2);
+//    ExecutorService threadPool = Executors.newFixedThreadPool(1);
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
@@ -53,11 +52,9 @@ public class ParsingNewListener implements MessageListener {
                 byte[] cc  = Base64.getDecoder().decode(inf.getBytes());
                 inf = new String(cc);
                 log.info("获取到数据:"+inf);
-                synchronized (inf.intern()) {
-                    if (inf.length() > 0) {
-                        Runnable runnable = new ParseRunnable(inf,redisTemplate,invoke);
-                        threadPool.submit(runnable);
-                    }
+                if (inf.length() > 0) {
+                    Runnable runnable = new ParseRunnable(inf,redisTemplate,invoke);
+                    runnable.run();
                 }
             }
         }catch (Exception e){
@@ -70,7 +67,7 @@ public class ParsingNewListener implements MessageListener {
 class ParseRunnable implements Runnable{
     @Autowired
     private DBInvoke invoke;
-    ExecutorService executorService = Executors.newFixedThreadPool(5);
+    ExecutorService executorService = Executors.newFixedThreadPool(2);
     @Autowired
     private RedisTemplate redisTemplate;
     private String inf;
@@ -84,8 +81,8 @@ class ParseRunnable implements Runnable{
         try {
             UdpDataInfo info = new UdpDataInfo();
             info.strInfo = Base64.getEncoder().encodeToString(inf.getBytes());
+            info.datetime = new Date();
             info.typeStr = "OTH";
-            info.strInfo = "OTH";
             int index = inf.indexOf(ICL.DIV_1E);
             while (index !=-1){
                 String str = inf.substring(0,index);
@@ -257,20 +254,29 @@ class ParseRunnable implements Runnable{
                 if (sbaddr == 1 && readcmd == 4) {
                     byte[] ssll = new byte[4];//瞬时流量
                     System.arraycopy(bs, 3, ssll, 0, ssll.length);
-                    ByteBuffer bsf = ByteBuffer.wrap(ssll);
-                    taskB.setFlow(Tools.bytes2Float(ssll));//瞬时流量
+                    float flow = Tools.bytes2Float(ssll);
+                    flow = Tools.keepDecimal(flow,6);
+                    taskB.setFlow(flow);//瞬时流量
                     byte[] total = new byte[8];//总量
                     System.arraycopy(bs, 9, total, 0, total.length);
-                    taskB.setSumflow(Tools.bytes2Float(total));//总量
+                    float sumFlow = Tools.bytes2Float(total);
+                    sumFlow = Tools.keepDecimal(sumFlow,6);
+                    taskB.setSumflow(sumFlow);//总量
                     byte[] temp = new byte[4];//温度
                     System.arraycopy(bs, 19, temp, 0, temp.length);
-                    taskB.setTemperature(Tools.bytes2Float(temp));//温度
+                    float temper = Tools.bytes2Float(temp);
+                    temper = Tools.keepDecimal(temper,6);
+                    taskB.setTemperature(temper);//温度
                     temp = new byte[4];//压力
                     System.arraycopy(bs, 23, temp, 0, temp.length);
-                    taskB.setPressure(Tools.bytes2Float(temp));//压力
+                    float press = Tools.bytes2Float(temp);
+                    press = Tools.keepDecimal(press,6);
+                    taskB.setPressure(press);//压力
                     temp = new byte[4];//总量
                     System.arraycopy(bs, 27, temp, 0, temp.length);
-                    taskB.setSumflow(Tools.bytes2Float(temp));//总量
+                    sumFlow = Tools.bytes2Float(temp);
+                    sumFlow = Tools.keepDecimal(sumFlow,6);
+                    taskB.setSumflow(sumFlow);//总量
                 }
             }
         }catch (Exception e){

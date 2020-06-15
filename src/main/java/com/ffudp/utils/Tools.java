@@ -1,5 +1,6 @@
 package com.ffudp.utils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Calendar;
@@ -193,5 +194,12 @@ public class Tools {
 
     public static synchronized Long getId(){
         return System.currentTimeMillis();
+    }
+
+    public static float keepDecimal(float fcy, int size) {
+        BigDecimal b = new BigDecimal(fcy);
+        // 保留2位小数
+        float f1 = b.setScale(size, BigDecimal.ROUND_HALF_UP).floatValue();;
+        return f1;
     }
 }

@@ -225,18 +225,22 @@ public class UDPDataServiceNew {
                     byte[] ssll = new byte[4];//瞬时流量
                     System.arraycopy(bs, 3, ssll, 0, ssll.length);
                     Float ll = Tools.bytes2Float(ssll);
+                    ll = Tools.keepDecimal(ll,6);
                     tskB.setFlow(ll);
                     byte[] temp = new byte[4];//温度
                     System.arraycopy(bs, 19, temp, 0, temp.length);
                     Float temper = Tools.bytes2Float(temp);
+                    temper = Tools.keepDecimal(temper,6);
                     tskB.setTemperature(temper);
                     temp = new byte[4];//压力
                     System.arraycopy(bs, 23, temp, 0, temp.length);
                     Float press = Tools.bytes2Float(temp);
+                    press = Tools.keepDecimal(press,6);
                     tskB.setPressure(press);
                     temp = new byte[4];//总量
                     System.arraycopy(bs, 27, temp, 0, temp.length);
                     Float zl = Tools.bytes2Float(temp);
+                    zl = Tools.keepDecimal(zl,6);
                     tskB.setSumflow(zl);
                 }
             } catch (Exception e) {
