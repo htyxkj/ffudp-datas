@@ -47,7 +47,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 //        ctx.write("server say :"+msg);
         ctx.flush();
     }
-
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        log.info("channelActive----->");
+    }
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.info("出错了：",cause);

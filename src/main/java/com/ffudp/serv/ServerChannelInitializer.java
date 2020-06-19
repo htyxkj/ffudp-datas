@@ -5,7 +5,10 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.CharsetUtil;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: 729002330@qq.com
@@ -22,5 +25,6 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
         channel.pipeline().addLast("decoder",new StringDecoder(CharsetUtil.UTF_8));
         channel.pipeline().addLast("encoder",new StringEncoder(CharsetUtil.UTF_8));
         channel.pipeline().addLast(new ServerHandler(publishService));
+        channel.pipeline().addLast(new ReadTimeoutHandler(1, TimeUnit.DAYS));
     }
 }

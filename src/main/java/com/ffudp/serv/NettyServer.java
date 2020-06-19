@@ -23,9 +23,15 @@ public class NettyServer {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try{
+//            ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class)
+//                    .localAddress(address).childHandler(new ServerChannelInitializer(publishService)).option(ChannelOption.SO_BACKLOG, 128)
+//                    .childOption(ChannelOption.SO_KEEPALIVE,true);
             ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class)
-                    .localAddress(address).childHandler(new ServerChannelInitializer(publishService)).option(ChannelOption.SO_BACKLOG, 128)
+                    .localAddress(address).childHandler(new ServerChannelInitializer(publishService)).option(ChannelOption.SO_BACKLOG, 1024)
                     .childOption(ChannelOption.SO_KEEPALIVE,true);
+            bootstrap.option(ChannelOption.SO_SNDBUF, 16*1024)
+                    .option(ChannelOption.SO_RCVBUF, 16*1024)
+                    .option(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture future = bootstrap.bind(address).sync();
             log.info("Server start listen at " + address.getPort());
         }catch (Exception e){

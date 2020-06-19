@@ -33,7 +33,7 @@ public class RepairServe {
     }
 
     @RequestMapping(value = "/ffRenew",method = {RequestMethod.POST, RequestMethod.GET},produces = "application/json;charset=utf-8")
-    public RtnEntity Renew(@RequestParam("stTime")String stTime,@RequestParam("edTime")String edTime,@RequestParam("sbid")String sbid,@RequestParam("sbid")String tkid) throws Exception {
+    public RtnEntity Renew(@RequestParam("stTime")String stTime,@RequestParam("edTime")String edTime,@RequestParam("sbid")String sbid,@RequestParam("tkid")String tkid) throws Exception {
         RtnEntity rtn = new RtnEntity();
         if(tkid == null){
             tkid = sbid+"_NOTASKID";

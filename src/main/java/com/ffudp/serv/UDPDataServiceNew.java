@@ -61,6 +61,8 @@ public class UDPDataServiceNew {
                 d1 = d1*1000;
                 logInfo.tmid = d1;
                 String key0 =  sbid+ ICL.DIV_D+d1;//设备编码_数据时间
+                String saveKey = ICL.SAVE_KEY+ICL.DIV_D+Tools.getSplitZu();
+                redisTemplate.opsForSet().add(saveKey, key0);
                 synchronized (key0.intern()) {
                     log.info(key0);
                     Calendar cal = Calendar.getInstance();
@@ -70,10 +72,10 @@ public class UDPDataServiceNew {
                         dmt = dmt + " 00:00:00";
                     }
                     String currKey = ICL.CURR_KEY + sbid + ICL.DIV_D + Tools.getSplitZu(cal);//分段KEY
-                    if(!redisTemplate.hasKey(currKey)){//没有分段记录
-                        SaveDBTask saveDBTask = new SaveDBTask(currKey,invoke,redisTemplate);
-                        executorService.submit(saveDBTask);
-                    }
+//                    if(!redisTemplate.hasKey(currKey)){//没有分段记录
+//                        SaveDBTask saveDBTask = new SaveDBTask(currKey,invoke,redisTemplate);
+//                        executorService.submit(saveDBTask);
+//                    }
                     ObTaskB tskB = null;
                     if (redisTemplate.hasKey(key0)) {
                         JSONObject info0 = (JSONObject) redisTemplate.opsForValue().get(key0);

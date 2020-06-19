@@ -23,9 +23,12 @@ import java.text.ParseException;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Author: 729002330@qq.com
@@ -41,48 +44,35 @@ public class ParsingNewListener implements MessageListener {
     @Lazy
     private RedisTemplate redisTemplate;
 
+    ExecutorService executorService = Executors.newFixedThreadPool(2);
+    private String inf = "";
+
 //    ExecutorService threadPool = Executors.newFixedThreadPool(1);
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
             byte[] bs = message.getBody();
-            String inf = new String(bs);
+            inf = new String(bs);
             if(!StringUtils.isEmpty(inf)) {
                 inf = inf.substring(1, inf.length()-1);
                 byte[] cc  = Base64.getDecoder().decode(inf.getBytes());
                 inf = new String(cc);
                 log.info("获取到数据:"+inf);
+                inf = inf.replaceAll("\n","");
+                inf = inf.replaceAll("\r","");
                 if (inf.length() > 0) {
-                    Runnable runnable = new ParseRunnable(inf,redisTemplate,invoke);
-                    runnable.run();
+                    parsing();
                 }
             }
         }catch (Exception e){
             e.printStackTrace();
         }
     }
-}
 
-@Slf4j
-class ParseRunnable implements Runnable{
-    @Autowired
-    private DBInvoke invoke;
-    ExecutorService executorService = Executors.newFixedThreadPool(2);
-    @Autowired
-    private RedisTemplate redisTemplate;
-    private String inf;
-    public ParseRunnable(String inf,RedisTemplate redisTemplate,DBInvoke invoke){
-        this.inf = inf;
-        this.invoke = invoke;
-        this.redisTemplate = redisTemplate;
-    }
-    @Override
-    public void run() {
+    public void parsing() {
         try {
             UdpDataInfo info = new UdpDataInfo();
-            info.strInfo = Base64.getEncoder().encodeToString(inf.getBytes());
             info.datetime = new Date();
-            info.typeStr = "OTH";
             int index = inf.indexOf(ICL.DIV_1E);
             while (index !=-1){
                 String str = inf.substring(0,index);
@@ -98,19 +88,26 @@ class ParseRunnable implements Runnable{
                 d1 = d1*1000;
                 s0 = s0.substring(_idx2+1);
                 _idx = s0.indexOf(ICL.DIV_1F);
+                if(_idx == -1){
+                    break;
+                }
                 String sbid = s0.substring(0,_idx);//设备编码
                 s0 = s0.substring(_idx+1);
 
                 String key0 =  sbid+ ICL.DIV_D+d1;//设备编码_数据时间
                 info.sbid = Long.parseLong(sbid);
+                String saveKey = ICL.SAVE_KEY+ICL.DIV_D+Tools.getSplitZu();
+                redisTemplate.opsForSet().add(saveKey, key0);
                 synchronized (key0.intern()) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(d1);
                     String currKey = ICL.CURR_KEY + sbid + ICL.DIV_D + Tools.getSplitZu(cal);//分段KEY
-                    if(!redisTemplate.hasKey(currKey)){//没有分段记录
-                        SaveDBTask saveDBTask = new SaveDBTask(currKey,invoke,redisTemplate);
-                        executorService.submit(saveDBTask);
-                    }
+
+//                    if(!redisTemplate.hasKey(currKey)){//没有分段记录
+//                        SaveDBTask saveDBTask = new SaveDBTask(currKey,invoke,redisTemplate);
+//                        executorService.submit(saveDBTask);
+//                    }
+
                     ObTaskB tskB = null;
                     if (redisTemplate.hasKey(key0)) {
                         JSONObject info0 = (JSONObject) redisTemplate.opsForValue().get(key0);
@@ -127,10 +124,13 @@ class ParseRunnable implements Runnable{
                         tskB = makeGPSData(s0,tskB);
                         info.typeStr = "GPS";
                         info.type = 5;
+                        info.strInfo = str;
                     } else if (str.startsWith("C")) {//传感器 数据
+                        log.info("解析传感器数据："+s0);
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
+                        info.bs = str.getBytes();
                     }else{
                         info.typeStr = "OTH";
                         info.strInfo = "OTH";
@@ -151,8 +151,8 @@ class ParseRunnable implements Runnable{
                         index =-1;
                     }
                 }
+                invoke.insertFFLogData(info);
             }
-            invoke.insertFFLogData(info);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -192,21 +192,44 @@ class ParseRunnable implements Runnable{
     public ObTaskB makeInfoData(String s0,ObTaskB taskB){
 //        C{1F}1591780499000{1F}863284044714018{1F}{01}{02}{03}{04}{05}{06}{07}{08}{09}{1E}
 //        byte[] bs = hexStr2Byte(s0);
-        s0 = s0.replaceAll("\n","");
-        s0 = s0.replaceAll("\r","");
         byte[] bs = s0.getBytes();
         String str = bytesToHexString(bs);
         int index = str.indexOf("0104");
-        if(index>-1){
+        if(index >-1) {
             str = str.substring(index);
+            if (str.length() < 66)
+                return taskB;
+            int _idx1 = getCharacterPosition("0104",str,2);
+            if(_idx1 !=-1){
+                boolean len66 = true;
+                while (len66){
+                    int idx0 = getCharacterPosition("0104",str,1);
+                    int idx1 = getCharacterPosition("0104",str,2);
+                    String _str = str;
+                    if(idx1 !=-1 ){
+                        _str = str.substring(idx0,idx1);
+                    }else {
+                        if(_str.length() !=66){
+                            return taskB;
+                        }
+                    }
+                    if(_str.length() !=66){//传感器数据一共66位
+                        str = str.substring(idx1);
+                    }else{
+                        str = _str;
+                        len66 = false;
+                    }
+                }
+            }
+            byte[] bbs = hexStr2Byte(str);
+            taskB = getFlowData(taskB, bbs);
+            if(taskB.getSumflow()<0.00001){
+                log.error("解析传感器数据异常，总流量小于0："+str);
+            }
+            return taskB;
+        }else{
+            return taskB;
         }
-        byte[] bbs = hexStr2Byte(str);
-        taskB = getFlowData(taskB,bbs);
-        if(taskB.getSumflow() <= 1 || taskB.getFlow() <=0.00001 ){
-            log.info(taskB.toString());
-            log.info("解析传感器数据错误，总流量为0 ："+str);
-        }
-        return taskB;
     }
 
     //生成GPS TaskB
@@ -227,20 +250,28 @@ class ParseRunnable implements Runnable{
         if("LNG".equals(kv[0])&&!StringUtils.isEmpty(kv[1])){
             String k0 = kv[1];
             k0 = k0.substring(0,k0.length()-1);
-            task.setLongitude(Float.parseFloat(k0));
+            Float lng = Float.parseFloat(k0);
+            lng = Tools.keepDecimal(lng,6);
+            task.setLongitude(lng);
         }
         if("LAT".equals(kv[0])&&!StringUtils.isEmpty(kv[1])){
             String k0 = kv[1];
             k0 = k0.substring(0,k0.length()-1);
-            task.setLatitude(Float.parseFloat(k0));
+            Float lat = Float.parseFloat(k0);
+            lat = Tools.keepDecimal(lat,6);
+            task.setLatitude(lat);
         }
         if("ALT".equals(kv[0])&&!StringUtils.isEmpty(kv[1])){
             String k0 = kv[1];
-            task.setHeight(Float.parseFloat(k0));
+            Float alt = Float.parseFloat(k0);
+            alt = Tools.keepDecimal(alt,2);
+            task.setHeight(alt);
         }
         if("SPEED".equals(kv[0])&&!StringUtils.isEmpty(kv[1])){
             String k0 = kv[1];
-            task.setSpeed(Float.parseFloat(k0));
+            Float speed = Float.parseFloat(k0);
+            speed = Tools.keepDecimal(speed,2);
+            task.setSpeed(speed);
         }
         return task;
     }
@@ -265,12 +296,12 @@ class ParseRunnable implements Runnable{
                     byte[] temp = new byte[4];//温度
                     System.arraycopy(bs, 19, temp, 0, temp.length);
                     float temper = Tools.bytes2Float(temp);
-                    temper = Tools.keepDecimal(temper,6);
+                    temper = Tools.keepDecimal(temper,2);
                     taskB.setTemperature(temper);//温度
                     temp = new byte[4];//压力
                     System.arraycopy(bs, 23, temp, 0, temp.length);
                     float press = Tools.bytes2Float(temp);
-                    press = Tools.keepDecimal(press,6);
+                    press = Tools.keepDecimal(press,3);
                     taskB.setPressure(press);//压力
                     temp = new byte[4];//总量
                     System.arraycopy(bs, 27, temp, 0, temp.length);
@@ -318,5 +349,23 @@ class ParseRunnable implements Runnable{
             sb.append(sTemp.toUpperCase());
         }
         return sb.toString();
+    }
+
+    //获取某个字符第几次出现的位置
+    public static int getCharacterPosition(String str,String val,int index){
+        //这里是获取"/"符号的位置
+        Matcher slashMatcher = Pattern.compile(str).matcher(val);
+        int mIdx = 0;
+        while(slashMatcher.find()) {
+            mIdx++;
+            //当"/"符号第k次出现的位置
+            if(mIdx == index){
+                break;
+            }
+        }
+        if(mIdx<index) {
+            return -1;
+        }
+        return slashMatcher.start();
     }
 }

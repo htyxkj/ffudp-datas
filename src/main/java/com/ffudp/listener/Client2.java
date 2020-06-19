@@ -15,8 +15,9 @@ import java.net.Socket;
  */
 public class Client2 {
 //        static String  host = "192.168.3.200";
-        static String  host = "192.168.3.5";
+//        static String  host = "192.168.3.5";
 //        static String  host = "211.144.37.205";
+        static String  host = "192.168.124.12";
     static int port = 55685;
     private static InputStreamReader isr = null;
     private static BufferedReader br = null;
@@ -39,12 +40,9 @@ public class Client2 {
             // 建立连接后获得输出流
             String message = "msg";
             OutputStream out = socket.getOutputStream();
-            String w1 = "202A4244413F7401041C202020202003" +
-                    "2E173B3F2548403F2001202020202020" +
-                    "20202A4244413F7401041C2020202020" +
-                    "032E173B3F2548403F20012020202020" ;
+            String w1 = "01049C0000800000838000AABE4B9E4027800198E441E20000800058F5413A82CF" ;
 
-            for (int i=0;i<1;i++){
+            for (int i=0;i<10000;i++){
                 long li = System.currentTimeMillis();
                 StringBuffer sb = new StringBuffer();
                 sb.append("C").append(ICL.DIV_1F).append(li);

@@ -100,7 +100,7 @@ public class Tools {
     }
 
     /**
-     * 时间按照5s分成12等分
+     * 时间按照4s分成15等分
      * @param cal
      * @return
      */
@@ -114,7 +114,7 @@ public class Tools {
     }
 
     /**
-     * 时间按照5s分成12等分
+     * 系统当前时间按照4s分成15等分
      * @return
      */
     public static synchronized String getSplitZu() {
