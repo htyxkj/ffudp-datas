@@ -45,14 +45,13 @@ public class ParsingNewListener implements MessageListener {
     private RedisTemplate redisTemplate;
 
     ExecutorService executorService = Executors.newFixedThreadPool(2);
-    private String inf = "";
 
 //    ExecutorService threadPool = Executors.newFixedThreadPool(1);
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
             byte[] bs = message.getBody();
-            inf = new String(bs);
+            String inf = new String(bs);
             if(!StringUtils.isEmpty(inf)) {
                 inf = inf.substring(1, inf.length()-1);
                 byte[] cc  = Base64.getDecoder().decode(inf.getBytes());
@@ -61,7 +60,7 @@ public class ParsingNewListener implements MessageListener {
                 inf = inf.replaceAll("\n","");
                 inf = inf.replaceAll("\r","");
                 if (inf.length() > 0) {
-                    parsing();
+                    parsing(inf);
                 }
             }
         }catch (Exception e){
@@ -69,13 +68,14 @@ public class ParsingNewListener implements MessageListener {
         }
     }
 
-    public void parsing() {
+    public void parsing(String inf) {
         try {
             UdpDataInfo info = new UdpDataInfo();
             info.datetime = new Date();
-            int index = inf.indexOf(ICL.DIV_1E);
+            String _info = inf;
+            int index = _info.indexOf(ICL.DIV_1E);
             while (index !=-1){
-                String str = inf.substring(0,index);
+                String str = _info.substring(0,index);
                 String s0 = str;
                 int _idx = s0.indexOf(ICL.DIV_1F);
                 int _idx2 = s0.indexOf(ICL.DIV_1F,_idx+1);
@@ -102,11 +102,6 @@ public class ParsingNewListener implements MessageListener {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(d1);
                     String currKey = ICL.CURR_KEY + sbid + ICL.DIV_D + Tools.getSplitZu(cal);//分段KEY
-
-//                    if(!redisTemplate.hasKey(currKey)){//没有分段记录
-//                        SaveDBTask saveDBTask = new SaveDBTask(currKey,invoke,redisTemplate);
-//                        executorService.submit(saveDBTask);
-//                    }
 
                     ObTaskB tskB = null;
                     if (redisTemplate.hasKey(key0)) {
@@ -143,17 +138,19 @@ public class ParsingNewListener implements MessageListener {
                     info.speedtime = tskB.getSpeedtime();
                     info.datetime = new Date();
 
-                    if(inf.length()>index){
-                        inf = inf.substring(index+1);
+                    if(_info.length()>index){
+                        _info = _info.substring(index+1);
                     }
-                    index = inf.indexOf(ICL.DIV_1E);
-                    if(inf.length()<50){
+                    index = _info.indexOf(ICL.DIV_1E);
+                    if(_info.length()<50){
                         index =-1;
                     }
                 }
                 invoke.insertFFLogData(info);
             }
         }catch (Exception e){
+            log.error("数据解析异常：",e);
+            log.error(inf);
             e.printStackTrace();
         }
     }
@@ -194,42 +191,28 @@ public class ParsingNewListener implements MessageListener {
 //        byte[] bs = hexStr2Byte(s0);
         byte[] bs = s0.getBytes();
         String str = bytesToHexString(bs);
-        int index = str.indexOf("0104");
-        if(index >-1) {
-            str = str.substring(index);
-            if (str.length() < 66)
-                return taskB;
-            int _idx1 = getCharacterPosition("0104",str,2);
-            if(_idx1 !=-1){
-                boolean len66 = true;
-                while (len66){
-                    int idx0 = getCharacterPosition("0104",str,1);
-                    int idx1 = getCharacterPosition("0104",str,2);
-                    String _str = str;
-                    if(idx1 !=-1 ){
-                        _str = str.substring(idx0,idx1);
-                    }else {
-                        if(_str.length() !=66){
-                            return taskB;
-                        }
-                    }
-                    if(_str.length() !=66){//传感器数据一共66位
-                        str = str.substring(idx1);
-                    }else{
-                        str = _str;
-                        len66 = false;
-                    }
+        int index = str.indexOf("040312");
+        while(index>-1){
+            int idx2 = str.indexOf("040312",index ==0?1:index);//获取第二个开头;
+            if(idx2>0){
+                //十多条记录
+                String s1 = str.substring(index,idx2);
+                str = str.substring(idx2);//0104;
+                //chaifen s1
+                if (s1.length()>=46){
+                    //数据完整
+                    taskB = getFlowData(taskB, str);
                 }
+            }else{
+                if (str.length()>=46){
+                    //数据完整
+                    taskB = getFlowData(taskB, str);
+                }
+                str = "";
             }
-            byte[] bbs = hexStr2Byte(str);
-            taskB = getFlowData(taskB, bbs);
-            if(taskB.getSumflow()<0.00001){
-                log.error("解析传感器数据异常，总流量小于0："+str);
-            }
-            return taskB;
-        }else{
-            return taskB;
+            index = str.indexOf("0104");
         }
+        return taskB;
     }
 
     //生成GPS TaskB
@@ -277,43 +260,70 @@ public class ParsingNewListener implements MessageListener {
     }
 
     //生成传感器 TaskB
-    public static ObTaskB getFlowData(ObTaskB taskB, byte[] bs){
+    public static ObTaskB getFlowData(ObTaskB tskB, String inf){
+        byte[] bs = hexStr2Byte(inf);
         try {
-            if(bs.length>= 30) {
-                byte sbaddr = bs[0];//设备地址
-                byte readcmd = bs[1];//读命令
-                if (sbaddr == 1 && readcmd == 4) {
-                    byte[] ssll = new byte[4];//瞬时流量
-                    System.arraycopy(bs, 3, ssll, 0, ssll.length);
-                    float flow = Tools.bytes2Float(ssll);
-                    flow = Tools.keepDecimal(flow,6);
-                    taskB.setFlow(flow);//瞬时流量
-                    byte[] total = new byte[8];//总量
-                    System.arraycopy(bs, 9, total, 0, total.length);
-                    float sumFlow = Tools.bytes2Float(total);
-                    sumFlow = Tools.keepDecimal(sumFlow,6);
-                    taskB.setSumflow(sumFlow);//总量
-                    byte[] temp = new byte[4];//温度
-                    System.arraycopy(bs, 19, temp, 0, temp.length);
-                    float temper = Tools.bytes2Float(temp);
-                    temper = Tools.keepDecimal(temper,2);
-                    taskB.setTemperature(temper);//温度
-                    temp = new byte[4];//压力
-                    System.arraycopy(bs, 23, temp, 0, temp.length);
-                    float press = Tools.bytes2Float(temp);
-                    press = Tools.keepDecimal(press,3);
-                    taskB.setPressure(press);//压力
-                    temp = new byte[4];//总量
-                    System.arraycopy(bs, 27, temp, 0, temp.length);
-                    sumFlow = Tools.bytes2Float(temp);
-                    sumFlow = Tools.keepDecimal(sumFlow,6);
-                    taskB.setSumflow(sumFlow);//总量
+            if(inf.length()>=46) {
+                try {
+                    if(inf.indexOf("040312")==0){//字头
+                        String fl = inf.substring(6,14);//瞬时流量
+                        Integer flow = Integer.parseInt(fl, 16);
+                        tskB.setFlow(flow/1000);
+                        String sfld = inf.substring(14,22);//累积低位
+                        Integer sumFlowD = Integer.parseInt(sfld, 16);
+                        String sflg = inf.substring(22,30);//累积高位
+                        Integer sumFlowG = Integer.parseInt(sflg, 16);
+                        tskB.setSumflow((sumFlowD+sumFlowG)/1000);
+                        String sd = inf.substring(30,34);//湿度
+                        Integer humidity = Integer.parseInt(sd, 16);
+                          tskB.setHumidity(humidity);
+                        String temp = inf.substring(34,38);//温度
+                        Integer temper =  Integer.parseInt(temp, 16);
+                        tskB.setTemperature(temper/10);
+                        String per = inf.substring(38,42);//压力
+                        Integer press =  Integer.parseInt(per, 16);
+                        tskB.setPressure(press/10);
+                    }
+                } catch (Exception e) {
+                    log.error("error:", e);
+                    e.printStackTrace();
                 }
             }
+//            if(bs.length>= 30) {
+//                byte sbaddr = bs[0];//设备地址
+//                byte readcmd = bs[1];//读命令
+//                if (sbaddr == 1 && readcmd == 4) {
+//                    byte[] ssll = new byte[4];//瞬时流量
+//                    System.arraycopy(bs, 3, ssll, 0, ssll.length);
+//                    float flow = Tools.bytes2Float(ssll);
+//                    flow = Tools.keepDecimal(flow,6);
+//                    tskB.setFlow(flow);//瞬时流量
+//                    byte[] total = new byte[8];//总量
+//                    System.arraycopy(bs, 9, total, 0, total.length);
+//                    float sumFlow = Tools.bytes2Float(total);
+//                    sumFlow = Tools.keepDecimal(sumFlow,6);
+//                    tskB.setSumflow(sumFlow);//总量
+//                    byte[] temp = new byte[4];//温度
+//                    System.arraycopy(bs, 19, temp, 0, temp.length);
+//                    float temper = Tools.bytes2Float(temp);
+//                    temper = Tools.keepDecimal(temper,2);
+//                    tskB.setTemperature(temper);//温度
+//                    temp = new byte[4];//压力
+//                    System.arraycopy(bs, 23, temp, 0, temp.length);
+//                    float press = Tools.bytes2Float(temp);
+//                    press = Tools.keepDecimal(press,3);
+//                    tskB.setPressure(press);//压力
+//                    temp = new byte[4];//总量
+//                    System.arraycopy(bs, 27, temp, 0, temp.length);
+//                    sumFlow = Tools.bytes2Float(temp);
+//                    sumFlow = Tools.keepDecimal(sumFlow,6);
+//                    tskB.setSumflow(sumFlow);//总量
+//                }
+//            }
         }catch (Exception e){
             log.error("解析传感器数据错误",e);
         }finally {
-            return taskB;
+            return tskB;
         }
     }
 
@@ -331,12 +341,9 @@ public class ParsingNewListener implements MessageListener {
     }
 
     public static void main(String[] args) {
-        String str = "01041C20202020200306471E5B2063403F20012020202020202020031944403F3F";
-
-        byte[] bs = hexStr2Byte(str);
-        ObTaskB tkb = new ObTaskB();
-        tkb = getFlowData(tkb,bs);
-        System.out.println(tkb.toString());
+        String str = "G1592795035000862808036298720#IMEI:862808036298720 Time:2020-06-22 11:03:55 LNG:116.444886E LAT:39.922741N ALT:64.800000 SPEED:0.024076C1592795035000862808036298720?v@ ??V??@?     :6?4?Dx??";
+        ParsingNewListener pn = new ParsingNewListener();
+        pn.parsing(str);
     }
 
     public static final String bytesToHexString(byte[] bArray) {
@@ -351,21 +358,5 @@ public class ParsingNewListener implements MessageListener {
         return sb.toString();
     }
 
-    //获取某个字符第几次出现的位置
-    public static int getCharacterPosition(String str,String val,int index){
-        //这里是获取"/"符号的位置
-        Matcher slashMatcher = Pattern.compile(str).matcher(val);
-        int mIdx = 0;
-        while(slashMatcher.find()) {
-            mIdx++;
-            //当"/"符号第k次出现的位置
-            if(mIdx == index){
-                break;
-            }
-        }
-        if(mIdx<index) {
-            return -1;
-        }
-        return slashMatcher.start();
-    }
+
 }

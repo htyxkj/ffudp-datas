@@ -54,9 +54,6 @@ public class SaveTaskbTask {
                     if(tskB != null) {
                         listB.add(tskB);
                     }
-                    if(tskB.getSumflow() == 0){
-                        log.info(tskB.toString());
-                    }
                 }
                 if(listB.size()>0) {
                     invoke.batchSaveObTaskB(listB);
@@ -82,7 +79,7 @@ public class SaveTaskbTask {
                     try {
                         tkid = invoke.getTkidBYsbid(tskB.getSbid()+"");
                     }catch (Exception e){
-//                        log.error("查询任务编码出错！",e);
+                        log.error("查询任务编码出错！",e);
                     }
                     if(tkid == null){
                         tkid = tskB.getSbid()+"_NOTASKID";
@@ -91,12 +88,19 @@ public class SaveTaskbTask {
                     }
                 }
                 tskB.setTkid(tkid.toString());
+                PkObTask pk = new PkObTask();
+                pk.setTkid(tkid.toString());
+                pk.setSpeedtime(tskB.getSpeedtime());
+                boolean oo = invoke.exits( pk );
+                if(oo){
+                    return null;
+                }
                 return tskB;
             } else {
                 return null;
             }
         }catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }

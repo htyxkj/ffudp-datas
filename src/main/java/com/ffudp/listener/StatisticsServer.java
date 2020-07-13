@@ -1,6 +1,7 @@
 package com.ffudp.listener;
 
 import com.ffudp.msg.PublishService;
+import io.netty.channel.ChannelFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,10 +21,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 @Component
-@Order(value=1)
+@Order(value=8)
 @Slf4j
 public class StatisticsServer implements CommandLineRunner {
 
+	@Autowired
+	NettyUdpServer nettyTcpServer;
 
 	@Autowired
 	private PublishService publishService;
@@ -39,7 +42,9 @@ public class StatisticsServer implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		log.info("启动监听："+port);
-		init();
+		//启动服务端
+		ChannelFuture start = nettyTcpServer.start();
+//		init();
 	}
 
 	public void init() throws IOException {
@@ -98,6 +103,7 @@ public class StatisticsServer implements CommandLineRunner {
 		String inf = bytesToHexString(buf);
 //		byte[] b2 =hexStr2Byte(inf);
 //		String key0 = udpService.service(b2,0,b2.length);
+		log.info("接收到数据："+inf);
 		publishService.publish("Parsing",inf);
 
 		buffer.clear();

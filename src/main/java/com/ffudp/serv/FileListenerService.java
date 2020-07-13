@@ -125,34 +125,56 @@ public class FileListenerService {
                                 }
                             }
                         }else{
-                            int idx0 = getCharacterPosition("0104",dataStr,1);
-                            int idx1 = getCharacterPosition("0104",dataStr,2);
-                            String str = dataStr.substring(idx0,idx1+1);
-                            if(str.length() !=66){//传感器数据一共66位
-                                str = dataStr.substring(idx0,idx0+1+66);
+                            if(dataStr.indexOf("040312") !=-1){//字头
+                                dataStr = dataStr.substring(dataStr.indexOf("040312"));
+                                if(dataStr.length()>=46) {
+                                    String fl = dataStr.substring(6, 14);//瞬时流量
+                                    Integer flow = Integer.parseInt(fl, 16);
+                                    taskB.setFlow(flow / 1000);
+                                    String sfld = dataStr.substring(14, 22);//累积低位
+                                    Integer sumFlowD = Integer.parseInt(sfld, 16);
+                                    String sflg = dataStr.substring(22, 30);//累积高位
+                                    Integer sumFlowG = Integer.parseInt(sflg, 16);
+                                    taskB.setSumflow((sumFlowD + sumFlowG) / 1000);
+                                    String sd = dataStr.substring(30, 34);//湿度
+                                    Integer humidity = Integer.parseInt(sd, 16);
+                                    taskB.setHumidity(humidity);
+                                    String temp = dataStr.substring(34, 38);//温度
+                                    Integer temper = Integer.parseInt(temp, 16);
+                                    taskB.setTemperature(temper / 10);
+                                    String per = dataStr.substring(38, 42);//压力
+                                    Integer press = Integer.parseInt(per, 16);
+                                    taskB.setPressure(press / 10);
+                                }
                             }
-                            byte[] bs = hexString2Bytes(str);
-                            byte[] ssll = new byte[4];//瞬时流量
-                            System.arraycopy(bs,3,ssll,0,ssll.length);
-                            Float ll = Tools.bytes2Float(ssll);
-                            taskB.setFlow(ll);//瞬时流量
-                            byte[] temp = new byte[4];//温度
-                            System.arraycopy(bs,19,temp,0,temp.length);
-                            Float temper =Tools.bytes2Float(temp);
-                            taskB.setFlow(temper);//温度
-                            temp = new byte[4];//压力
-                            System.arraycopy(bs,23,temp,0,temp.length);
-                            Float press = Tools.bytes2Float(temp);
-                            taskB.setPressure(press);//压力
-                            temp = new byte[4];//总量
-                            System.arraycopy(bs,27,temp,0,temp.length);
-                            Float zl = Tools.bytes2Float(temp);
-                            taskB.setSumflow(zl);//总流量
+//                            int idx0 = getCharacterPosition("0104",dataStr,1);
+//                            int idx1 = getCharacterPosition("0104",dataStr,2);
+//                            String str = dataStr.substring(idx0,idx1+1);
+//                            if(str.length() !=66){//传感器数据一共66位
+//                                str = dataStr.substring(idx0,idx0+1+66);
+//                            }
+//                            byte[] bs = hexString2Bytes(str);
+//                            byte[] ssll = new byte[4];//瞬时流量
+//                            System.arraycopy(bs,3,ssll,0,ssll.length);
+//                            Float ll = Tools.bytes2Float(ssll);
+//                            taskB.setFlow(ll);//瞬时流量
+//                            byte[] temp = new byte[4];//温度
+//                            System.arraycopy(bs,19,temp,0,temp.length);
+//                            Float temper =Tools.bytes2Float(temp);
+//                            taskB.setFlow(temper);//温度
+//                            temp = new byte[4];//压力
+//                            System.arraycopy(bs,23,temp,0,temp.length);
+//                            Float press = Tools.bytes2Float(temp);
+//                            taskB.setPressure(press);//压力
+//                            temp = new byte[4];//总量
+//                            System.arraycopy(bs,27,temp,0,temp.length);
+//                            Float zl = Tools.bytes2Float(temp);
+//                            taskB.setSumflow(zl);//总流量
                         }
                     }
                 }catch (Exception e){
                     log.error("断点续传文件解析失败,文件名称："+fileName+"，数据："+s);
-                    log.error("错误信息：",e);
+//                    log.error("错误信息：",e);
                 }
             }
             br.close();
@@ -168,7 +190,7 @@ public class FileListenerService {
             file.renameTo(toFile);
         }catch (Exception e){
             log.error("断点续传文件解析失败,文件名称："+fileName);
-            log.error("错误信息：",e);
+//            log.error("错误信息：",e);
         }
     }
 

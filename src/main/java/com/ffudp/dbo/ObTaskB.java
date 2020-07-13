@@ -30,6 +30,24 @@ public class ObTaskB  implements Serializable {
     private int effective;//定位状态是否有效
     private String direction;//方向
     private Date datetime;//保存时间/上传时间
+    private float humidity;//湿度
+    private float windspeed;//风速
+
+    public float getHumidity() {
+        return humidity;
+    }
+
+    public float getWindspeed() {
+        return windspeed;
+    }
+
+    public void setHumidity(float humidity) {
+        this.humidity = humidity;
+    }
+
+    public void setWindspeed(float windspeed) {
+        this.windspeed = windspeed;
+    }
 
     public String geTkid() {
         return tkid;

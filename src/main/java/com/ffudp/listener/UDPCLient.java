@@ -45,12 +45,13 @@ class MutilThread extends Thread{
     @Override
     public void run() {
         try {
-//            String  host = "127.0.0.1";
+            String  host = "127.0.0.1";
 //    static String  host = "192.168.3.200";
-            String  host = "192.168.3.5";
+//            String  host = "211.144.37.205";
             InetAddress inet = InetAddress.getByName(host);
             DatagramSocket ds = new DatagramSocket();
-            String d0="01049C0000800000838000AABE4B9E4027800198E441E20000800058F5413A82CF";
+            String d0="04031200004650000D881A00000000021501370001BD9E";
+                     //01049C0000800000838000AABE4B9E4027800198E441E20000800058F5413A82CF
             for(int i=0;i<99999;i++){
                 long l1 = System.currentTimeMillis();
                 byte[] date =hexStr2Byte(d0);
@@ -64,7 +65,8 @@ class MutilThread extends Thread{
                 DatagramPacket dp = new DatagramPacket(buffer.array(), len, inet,8340);
                 //调用ds对象的方法send，发送数据包
                 ds.send(dp);
-                Thread.sleep(10);
+                Thread.sleep(1000);
+                System.out.println("发送数据"+i);
             }
             ds.close();
         } catch (Exception e) {

@@ -217,33 +217,29 @@ public class UDPDataServiceNew {
      */
     private ObTaskB makeUserData(byte[] bs, ObTaskB tskB,UdpDataInfo logInfo) {
         logInfo.typeStr = "type8";
-        if(bs.length>=32) {
-            byte sbAddr = bs[0];//设备地址
-            byte readCmd = bs[1];//读命令
+        String inf = Tools.bytesToHexString(bs);
+        log.info("开始解析传感器数据："+inf);
+        if(inf.length()>=46) {
             try {
-                if (sbAddr == 1 && readCmd == 4) {
+                if(inf.indexOf("040312")==0){//字头
                     logInfo.typeStr = "8-DATA";
-                    //是传感器数据
-                    byte[] ssll = new byte[4];//瞬时流量
-                    System.arraycopy(bs, 3, ssll, 0, ssll.length);
-                    Float ll = Tools.bytes2Float(ssll);
-                    ll = Tools.keepDecimal(ll,6);
-                    tskB.setFlow(ll);
-                    byte[] temp = new byte[4];//温度
-                    System.arraycopy(bs, 19, temp, 0, temp.length);
-                    Float temper = Tools.bytes2Float(temp);
-                    temper = Tools.keepDecimal(temper,6);
-                    tskB.setTemperature(temper);
-                    temp = new byte[4];//压力
-                    System.arraycopy(bs, 23, temp, 0, temp.length);
-                    Float press = Tools.bytes2Float(temp);
-                    press = Tools.keepDecimal(press,6);
-                    tskB.setPressure(press);
-                    temp = new byte[4];//总量
-                    System.arraycopy(bs, 27, temp, 0, temp.length);
-                    Float zl = Tools.bytes2Float(temp);
-                    zl = Tools.keepDecimal(zl,6);
-                    tskB.setSumflow(zl);
+                    String fl = inf.substring(6,14);//瞬时流量
+                    Integer flow = Integer.parseInt(fl, 16);
+                    tskB.setFlow(flow/1000);
+                    String sfld = inf.substring(14,22);//累积低位
+                    Integer sumFlowD = Integer.parseInt(sfld, 16);
+                    String sflg = inf.substring(22,30);//累积高位
+                    Integer sumFlowG = Integer.parseInt(sflg, 16);
+                    tskB.setSumflow((sumFlowD+sumFlowG)/1000);
+                    String sd = inf.substring(30,34);//湿度
+                    Integer humidity = Integer.parseInt(sd, 16);
+                    tskB.setHumidity(humidity);
+                    String temp = inf.substring(34,38);//温度
+                    Integer temper =  Integer.parseInt(temp, 16);
+                    tskB.setTemperature(temper/10);
+                    String per = inf.substring(38,42);//压力
+                    Integer press =  Integer.parseInt(per, 16);
+                    tskB.setPressure(press/10);
                 }
             } catch (Exception e) {
                 log.error("error:", e);
