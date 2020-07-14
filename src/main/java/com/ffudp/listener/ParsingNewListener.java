@@ -121,7 +121,6 @@ public class ParsingNewListener implements MessageListener {
                         info.type = 5;
                         info.strInfo = str;
                     } else if (str.startsWith("C")) {//传感器 数据
-                        log.info("解析传感器数据："+s0);
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
@@ -266,23 +265,24 @@ public class ParsingNewListener implements MessageListener {
             if(inf.length()>=46) {
                 try {
                     if(inf.indexOf("040312")==0){//字头
+                        log.info("开始解析传感器数据："+inf);
                         String fl = inf.substring(6,14);//瞬时流量
                         Integer flow = Integer.parseInt(fl, 16);
-                        tskB.setFlow(flow/1000);
+                        tskB.setFlow((float) (flow/1000.0));
                         String sfld = inf.substring(14,22);//累积低位
                         Integer sumFlowD = Integer.parseInt(sfld, 16);
                         String sflg = inf.substring(22,30);//累积高位
                         Integer sumFlowG = Integer.parseInt(sflg, 16);
-                        tskB.setSumflow((sumFlowD+sumFlowG)/1000);
+                        tskB.setSumflow((float) ((sumFlowD+sumFlowG)/1000.0));
                         String sd = inf.substring(30,34);//湿度
                         Integer humidity = Integer.parseInt(sd, 16);
-                          tskB.setHumidity(humidity);
+                        tskB.setHumidity((float) (humidity/10.0));
                         String temp = inf.substring(34,38);//温度
                         Integer temper =  Integer.parseInt(temp, 16);
-                        tskB.setTemperature(temper/10);
+                        tskB.setTemperature((float) (temper/10.0));
                         String per = inf.substring(38,42);//压力
                         Integer press =  Integer.parseInt(per, 16);
-                        tskB.setPressure(press/10);
+                        tskB.setPressure((float) (press/10.0));
                     }
                 } catch (Exception e) {
                     log.error("error:", e);

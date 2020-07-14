@@ -130,21 +130,21 @@ public class FileListenerService {
                                 if(dataStr.length()>=46) {
                                     String fl = dataStr.substring(6, 14);//瞬时流量
                                     Integer flow = Integer.parseInt(fl, 16);
-                                    taskB.setFlow(flow / 1000);
+                                    taskB.setFlow((float) (flow / 1000.0));
                                     String sfld = dataStr.substring(14, 22);//累积低位
                                     Integer sumFlowD = Integer.parseInt(sfld, 16);
                                     String sflg = dataStr.substring(22, 30);//累积高位
                                     Integer sumFlowG = Integer.parseInt(sflg, 16);
-                                    taskB.setSumflow((sumFlowD + sumFlowG) / 1000);
+                                    taskB.setSumflow((float) ((sumFlowD + sumFlowG) / 1000.0));
                                     String sd = dataStr.substring(30, 34);//湿度
                                     Integer humidity = Integer.parseInt(sd, 16);
-                                    taskB.setHumidity(humidity);
+                                    taskB.setHumidity((float) (humidity/10.0));
                                     String temp = dataStr.substring(34, 38);//温度
                                     Integer temper = Integer.parseInt(temp, 16);
-                                    taskB.setTemperature(temper / 10);
+                                    taskB.setTemperature((float) (temper / 10.0));
                                     String per = dataStr.substring(38, 42);//压力
                                     Integer press = Integer.parseInt(per, 16);
-                                    taskB.setPressure(press / 10);
+                                    taskB.setPressure((float) (press / 10.0));
                                 }
                             }
 //                            int idx0 = getCharacterPosition("0104",dataStr,1);
