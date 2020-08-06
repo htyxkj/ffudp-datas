@@ -41,4 +41,12 @@ public class RepairServe {
         service.Renew(stTime,edTime,sbid,tkid);
         return rtn;
     }
+
+    @RequestMapping(value = "/ffRepairAll0",method = {RequestMethod.POST, RequestMethod.GET},produces = "application/json;charset=utf-8")
+    public RtnEntity ffRepairAll0(@RequestParam("tkid")String tkid) throws Exception {
+        RtnEntity rtn = new RtnEntity();
+        service.repairAll0(tkid);
+        return rtn;
+    }
+
 }

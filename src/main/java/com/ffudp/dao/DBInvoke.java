@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -125,6 +126,16 @@ public class DBInvoke {
         return rep.findAll(example);
     }
 
+    public ObTaskB getTaskbBytimeID(String tkid, Date time){
+        PkObTask id = new PkObTask();
+        id.setTkid(tkid);
+        id.setSpeedtime(time);
+        if(rep.existsById(id)) {
+            return rep.getOne(id);
+        }else{
+            return null;
+        }
+    }
 
     /**
      * 根据时间，设备编码 查询源数据

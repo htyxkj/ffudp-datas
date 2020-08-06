@@ -95,6 +95,32 @@ public class UDPDataRepairService {
         return num;
     }
 
+    public Integer repairAll0(String tkid) throws Exception{
+        int num = 0;
+        log.info("解析传感器数据");
+        List<ObTaskB> noDataList = invoke.getNoData(tkid);
+        log.info("传感器错误数据条数："+noDataList.size());
+        if(noDataList != null){
+            for (int i=0;i<noDataList.size();i++) {
+                ObTaskB otb = noDataList.get(i);
+                long time = otb.getSpeedtime().getTime();//时间
+                time = time/1000;
+                time = time*1000;
+                time = time-1000;
+                ObTaskB tb  = invoke.getTaskbBytimeID(tkid,new Date(time));
+                if(tb !=null) {
+                    noDataList.get(i).setFlow(tb.getFlow());
+                    noDataList.get(i).setSumflow(tb.getSumflow());
+                    noDataList.get(i).setTemperature(tb.getTemperature());
+                    noDataList.get(i).setPressure(tb.getPressure());
+                }
+            }
+            invoke.batchSaveObTaskB(noDataList);
+        }
+        return num;
+    }
+
+
     public ObTaskB getGPSData(String strInfo,int firstD){
         ObTaskB tskB = new ObTaskB();
         String typeStr = strInfo.substring(0, firstD);
