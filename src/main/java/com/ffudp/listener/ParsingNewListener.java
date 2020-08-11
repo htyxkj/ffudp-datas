@@ -6,29 +6,23 @@ import com.ffudp.cl.ICL;
 import com.ffudp.dao.DBInvoke;
 import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.UdpDataInfo;
-import com.ffudp.serv.UDPDataServiceNew;
 import com.ffudp.utils.Tools;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @Author: 729002330@qq.com
@@ -44,9 +38,9 @@ public class ParsingNewListener implements MessageListener {
     @Lazy
     private RedisTemplate redisTemplate;
 
-    ExecutorService executorService = Executors.newFixedThreadPool(2);
+    @Value("${server.prefix}")
+    private static String prefix;
 
-//    ExecutorService threadPool = Executors.newFixedThreadPool(1);
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
@@ -190,9 +184,9 @@ public class ParsingNewListener implements MessageListener {
 //        byte[] bs = hexStr2Byte(s0);
         byte[] bs = s0.getBytes();
         String str = bytesToHexString(bs);
-        int index = str.indexOf("040312");
+        int index = str.indexOf(prefix);
         while(index>-1){
-            int idx2 = str.indexOf("040312",index ==0?1:index);//获取第二个开头;
+            int idx2 = str.indexOf(prefix,index ==0?1:index);//获取第二个开头;
             if(idx2>0){
                 //十多条记录
                 String s1 = str.substring(index,idx2);
@@ -260,11 +254,10 @@ public class ParsingNewListener implements MessageListener {
 
     //生成传感器 TaskB
     public static ObTaskB getFlowData(ObTaskB tskB, String inf){
-        byte[] bs = hexStr2Byte(inf);
         try {
             if(inf.length()>=46) {
                 try {
-                    if(inf.indexOf("040312")==0){//字头
+                    if(inf.indexOf(prefix)==0){//字头
                         log.info("开始解析传感器数据："+inf);
                         String fl = inf.substring(6,14);//瞬时流量
                         Integer flow = Integer.parseInt(fl, 16);
@@ -289,37 +282,6 @@ public class ParsingNewListener implements MessageListener {
                     e.printStackTrace();
                 }
             }
-//            if(bs.length>= 30) {
-//                byte sbaddr = bs[0];//设备地址
-//                byte readcmd = bs[1];//读命令
-//                if (sbaddr == 1 && readcmd == 4) {
-//                    byte[] ssll = new byte[4];//瞬时流量
-//                    System.arraycopy(bs, 3, ssll, 0, ssll.length);
-//                    float flow = Tools.bytes2Float(ssll);
-//                    flow = Tools.keepDecimal(flow,6);
-//                    tskB.setFlow(flow);//瞬时流量
-//                    byte[] total = new byte[8];//总量
-//                    System.arraycopy(bs, 9, total, 0, total.length);
-//                    float sumFlow = Tools.bytes2Float(total);
-//                    sumFlow = Tools.keepDecimal(sumFlow,6);
-//                    tskB.setSumflow(sumFlow);//总量
-//                    byte[] temp = new byte[4];//温度
-//                    System.arraycopy(bs, 19, temp, 0, temp.length);
-//                    float temper = Tools.bytes2Float(temp);
-//                    temper = Tools.keepDecimal(temper,2);
-//                    tskB.setTemperature(temper);//温度
-//                    temp = new byte[4];//压力
-//                    System.arraycopy(bs, 23, temp, 0, temp.length);
-//                    float press = Tools.bytes2Float(temp);
-//                    press = Tools.keepDecimal(press,3);
-//                    tskB.setPressure(press);//压力
-//                    temp = new byte[4];//总量
-//                    System.arraycopy(bs, 27, temp, 0, temp.length);
-//                    sumFlow = Tools.bytes2Float(temp);
-//                    sumFlow = Tools.keepDecimal(sumFlow,6);
-//                    tskB.setSumflow(sumFlow);//总量
-//                }
-//            }
         }catch (Exception e){
             log.error("解析传感器数据错误",e);
         }finally {

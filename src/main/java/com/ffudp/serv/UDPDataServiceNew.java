@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.CronTrigger;
@@ -36,6 +37,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UDPDataServiceNew {
     ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+    @Value("${server.prefix}")
+    private static String prefix;
 
     @Autowired
     private DBInvoke invoke;
@@ -221,7 +225,7 @@ public class UDPDataServiceNew {
         log.info("开始解析传感器数据："+inf);
         if(inf.length()>=46) {
             try {
-                if(inf.indexOf("040312")==0){//字头
+                if(inf.indexOf(prefix)==0){//字头
                     logInfo.typeStr = "8-DATA";
                     String fl = inf.substring(6,14);//瞬时流量
                     Integer flow = Integer.parseInt(fl, 16);

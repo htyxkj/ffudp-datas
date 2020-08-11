@@ -35,6 +35,9 @@ public class FileListenerService {
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private static SimpleDateFormat sdfymdh = new SimpleDateFormat("yyyyMMddHH");
 
+    @Value("${server.prefix}")
+    private static String prefix;
+
     @Value("${server.ffftpbk}")
     private String monitorBkDir;//ftp 解析后文件存放路径
 
@@ -125,8 +128,8 @@ public class FileListenerService {
                                 }
                             }
                         }else{
-                            if(dataStr.indexOf("040312") !=-1){//字头
-                                dataStr = dataStr.substring(dataStr.indexOf("040312"));
+                            if(dataStr.indexOf(prefix) !=-1){//字头
+                                dataStr = dataStr.substring(dataStr.indexOf(prefix));
                                 if(dataStr.length()>=46) {
                                     String fl = dataStr.substring(6, 14);//瞬时流量
                                     Integer flow = Integer.parseInt(fl, 16);
