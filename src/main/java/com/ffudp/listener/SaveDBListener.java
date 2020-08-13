@@ -82,8 +82,8 @@ public class SaveDBListener implements MessageListener {
                     tskB.setFlow(infoTskB.getFlow());
                     tskB.setTemperature(infoTskB.getTemperature());
                     tskB.setPressure(infoTskB.getPressure());
+                    tskB.setPressure2(infoTskB.getPressure2());
                     tskB.setSumflow(infoTskB.getSumflow());
-
                 }
                 String rKey = tskB.getSbid()+"_TKID";
                 Object tkid = redisTemplate.opsForValue().get(rKey);

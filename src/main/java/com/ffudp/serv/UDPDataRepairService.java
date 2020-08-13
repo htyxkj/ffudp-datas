@@ -88,6 +88,7 @@ public class UDPDataRepairService {
                     noDataList.get(i).setSumflow(tb.getSumflow());
                     noDataList.get(i).setTemperature(tb.getTemperature());
                     noDataList.get(i).setPressure(tb.getPressure());
+                    noDataList.get(i).setPressure2(tb.getPressure2());
                 }
             }
             invoke.batchSaveObTaskB(noDataList);

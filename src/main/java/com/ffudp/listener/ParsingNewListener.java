@@ -38,8 +38,7 @@ public class ParsingNewListener implements MessageListener {
     @Lazy
     private RedisTemplate redisTemplate;
 
-    @Value("${server.prefix}")
-    private static String prefix;
+    private static String prefix = "040314";
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
@@ -192,18 +191,18 @@ public class ParsingNewListener implements MessageListener {
                 String s1 = str.substring(index,idx2);
                 str = str.substring(idx2);//0104;
                 //chaifen s1
-                if (s1.length()>=46){
+                if (s1.length()>=50){
                     //数据完整
                     taskB = getFlowData(taskB, str);
                 }
             }else{
-                if (str.length()>=46){
+                if (str.length()>=50){
                     //数据完整
                     taskB = getFlowData(taskB, str);
                 }
                 str = "";
             }
-            index = str.indexOf("0104");
+            index = str.indexOf(prefix);
         }
         return taskB;
     }
@@ -255,7 +254,7 @@ public class ParsingNewListener implements MessageListener {
     //生成传感器 TaskB
     public static ObTaskB getFlowData(ObTaskB tskB, String inf){
         try {
-            if(inf.length()>=46) {
+            if(inf.length()>=50) {
                 try {
                     if(inf.indexOf(prefix)==0){//字头
                         log.info("开始解析传感器数据："+inf);
@@ -276,6 +275,9 @@ public class ParsingNewListener implements MessageListener {
                         String per = inf.substring(38,42);//压力
                         Integer press =  Integer.parseInt(per, 16);
                         tskB.setPressure((float) (press/10.0));
+                        String per2 = inf.substring(42,46);//压力2
+                        Integer press2 =  Integer.parseInt(per2, 16);
+                        tskB.setPressure2((float) (press2/10.0));
                     }
                 } catch (Exception e) {
                     log.error("error:", e);
@@ -303,9 +305,9 @@ public class ParsingNewListener implements MessageListener {
     }
 
     public static void main(String[] args) {
-        String str = "G1592795035000862808036298720#IMEI:862808036298720 Time:2020-06-22 11:03:55 LNG:116.444886E LAT:39.922741N ALT:64.800000 SPEED:0.024076C1592795035000862808036298720?v@ ??V??@?     :6?4?Dx??";
-        ParsingNewListener pn = new ParsingNewListener();
-        pn.parsing(str);
+        String str = "040314000000000000105400000000ffffffff0001ffff936c";
+        ObTaskB taskB = new ObTaskB();
+        getFlowData(taskB,str);
     }
 
     public static final String bytesToHexString(byte[] bArray) {

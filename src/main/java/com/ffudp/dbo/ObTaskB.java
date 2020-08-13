@@ -27,6 +27,7 @@ public class ObTaskB  implements Serializable {
     private float sumfolw;//总流量
     private float temperature;//温度
     private float pressure;//压力
+    private float pressure2;//压力2
     private int effective;//定位状态是否有效
     private String direction;//方向
     private Date datetime;//保存时间/上传时间
@@ -144,6 +145,14 @@ public class ObTaskB  implements Serializable {
         this.pressure = pressure;
     }
 
+    public float getPressure2() {
+        return pressure2;
+    }
+
+    public void setPressure2(float pressure2) {
+        this.pressure2 = pressure2;
+    }
+
     public boolean isEffective() {
         return effective ==0?false:true;
     }
@@ -179,6 +188,7 @@ public class ObTaskB  implements Serializable {
                 ", sumfolw=" + sumfolw +
                 ", temperature=" + temperature +
                 ", pressure=" + pressure +
+                ", pressure2=" + pressure2 +
                 ", effective=" + effective +
                 ", direction='" + direction + '\'' +
                 ", datetime=" + datetime +

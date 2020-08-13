@@ -15,8 +15,10 @@ import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class UDPDataServiceNew {
     ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    @Value("${server.prefix}")
-    private static String prefix;
+    private static String prefix = "040314";
 
     @Autowired
     private DBInvoke invoke;
@@ -223,9 +224,9 @@ public class UDPDataServiceNew {
         logInfo.typeStr = "type8";
         String inf = Tools.bytesToHexString(bs);
         log.info("开始解析传感器数据："+inf);
-        if(inf.length()>=46) {
+        if(inf!=null && inf.length()>=50) {
             try {
-                if(inf.indexOf(prefix)==0){//字头
+                if(inf!=null && inf.indexOf(prefix)==0){//字头
                     logInfo.typeStr = "8-DATA";
                     String fl = inf.substring(6,14);//瞬时流量
                     Integer flow = Integer.parseInt(fl, 16);
@@ -244,6 +245,9 @@ public class UDPDataServiceNew {
                     String per = inf.substring(38,42);//压力
                     Integer press =  Integer.parseInt(per, 16);
                     tskB.setPressure((float) (press/10.0));
+                    String per2 = inf.substring(42,46);//压力2
+                    Integer press2 =  Integer.parseInt(per2, 16);
+                    tskB.setPressure2((float) (press2/10.0));
                 }
             } catch (Exception e) {
                 log.error("error:", e);

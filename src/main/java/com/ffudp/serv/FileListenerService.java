@@ -35,8 +35,7 @@ public class FileListenerService {
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private static SimpleDateFormat sdfymdh = new SimpleDateFormat("yyyyMMddHH");
 
-    @Value("${server.prefix}")
-    private static String prefix;
+    private static String prefix = "040314";
 
     @Value("${server.ffftpbk}")
     private String monitorBkDir;//ftp 解析后文件存放路径
@@ -130,7 +129,7 @@ public class FileListenerService {
                         }else{
                             if(dataStr.indexOf(prefix) !=-1){//字头
                                 dataStr = dataStr.substring(dataStr.indexOf(prefix));
-                                if(dataStr.length()>=46) {
+                                if(dataStr.length()>=50) {
                                     String fl = dataStr.substring(6, 14);//瞬时流量
                                     Integer flow = Integer.parseInt(fl, 16);
                                     taskB.setFlow((float) (flow / 1000.0));
@@ -148,6 +147,9 @@ public class FileListenerService {
                                     String per = dataStr.substring(38, 42);//压力
                                     Integer press = Integer.parseInt(per, 16);
                                     taskB.setPressure((float) (press / 10.0));
+                                    String per2 = dataStr.substring(42,46);//压力2
+                                    Integer press2 =  Integer.parseInt(per2, 16);
+                                    taskB.setPressure2((float) (press2/10.0));
                                 }
                             }
 //                            int idx0 = getCharacterPosition("0104",dataStr,1);

@@ -95,6 +95,7 @@ public class SaveTaskbTask {
                 if(oo){
                     return null;
                 }
+                log.info(tskB.toString());
                 return tskB;
             } else {
                 return null;
