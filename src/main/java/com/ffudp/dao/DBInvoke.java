@@ -6,7 +6,9 @@ import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.PkObTask;
 import com.ffudp.dbo.UdpDataInfo;
 import com.ffudp.utils.ConnManager;
+import com.ffudp.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,17 +64,20 @@ public class DBInvoke {
      * @return
      */
     public List<ObTaskB> getNoGPS(String tkid){
+
         List<ObTaskB> listInfo= new ArrayList<ObTaskB>();
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             conn = pgSource.getConnection();
-            stmt = conn.prepareStatement("select speedtime,tkid,longitude,latitude,speed,height,direction,flow,sumfolw,pressure,temperature,effective,sbid,datetime from ob_taska where tkid ='"+tkid+"'  and  to_number(latitude,'999999999')  =0  and  to_number(longitude,'999999999')  =0 and speed =0 and height =0 ORDER BY speedtime");
+            stmt = conn.prepareStatement("select speedtime,tkid,longitude,latitude,speed,height,direction,flow,sumfolw,pressure,temperature,effective,sbid,datetime from ob_taska where tkid =? and  to_number(latitude,'999999999')  =0  and  to_number(longitude,'999999999')  =0 and speed =0 and height =0 ORDER BY speedtime");
+//                        stmt = conn.prepareStatement("select speedtime,tkid,longitude,latitude,speed,height,direction,flow,sumfolw,pressure,temperature,effective,sbid,datetime from ob_taska where tkid =?  ORDER BY speedtime");
+            stmt.setString(1,tkid);
             rs = stmt.executeQuery();
             while (rs.next()){
                 ObTaskB info = new ObTaskB();
-                info.setSpeedtime(rs.getDate(1));
+                info.setSpeedtime(rs.getTimestamp(1));
                 info.setTkid(rs.getString(2));
                 info.setLongitude(rs.getFloat(3));
                 info.setLatitude(rs.getFloat(4));
@@ -85,9 +90,10 @@ public class DBInvoke {
                 info.setTemperature(rs.getFloat(11));
                 info.setEffective(rs.getBoolean(12));
                 info.setSbid(rs.getLong(13));
-                info.setDatetime(rs.getDate(14));
+                info.setDatetime(rs.getTimestamp(14));
                 listInfo.add(info);
             }
+            log.info("GPS错误数据条数："+listInfo.size());
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -98,6 +104,21 @@ public class DBInvoke {
             }
             return listInfo;
         }
+//        ObTaskB tskb = new ObTaskB();
+//        tskb.setTkid(tkid);
+//        tskb.setLongitude(0);
+//        tskb.setLatitude(0);
+//        //创建匹配器，即如何使用查询条件
+//        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+//                .withMatcher("tkid",ExampleMatcher.GenericPropertyMatchers.exact())
+//                .withMatcher("longitude",ExampleMatcher.GenericPropertyMatchers.exact())
+//                .withMatcher("latitude",ExampleMatcher.GenericPropertyMatchers.exact())
+//                .withIgnorePaths("speedtime").withIgnorePaths("sbid").withIgnorePaths("speed").withIgnorePaths("height").withIgnorePaths("flow")
+//                .withIgnorePaths("sumfolw").withIgnorePaths("temperature").withIgnorePaths("ressure")
+//                .withIgnorePaths("effective").withIgnorePaths("direction").withIgnorePaths("datetime");//isFace字段不参与匹配
+//
+//        Example<ObTaskB> example = Example.of(tskb,exampleMatcher);
+//        return rep.findAll(example);
     }
     /**
      * 根据任务编码查询没有传感器数据的记录

@@ -25,6 +25,12 @@ public class RepairServe {
     @Autowired
     private UDPDataRepairService service;
 
+    /**
+     * 修复 GPS 或 传感器数据 都为0的记录
+     * @param tkid
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/ffRepair",method = {RequestMethod.POST, RequestMethod.GET},produces = "application/json;charset=utf-8")
     public RtnEntity order(@RequestParam("tkid")String tkid) throws Exception {
         RtnEntity rtn = new RtnEntity();

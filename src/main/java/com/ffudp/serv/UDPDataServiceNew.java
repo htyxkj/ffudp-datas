@@ -229,6 +229,9 @@ public class UDPDataServiceNew {
                 if(inf!=null && inf.indexOf(prefix)==0){//字头
                     logInfo.typeStr = "8-DATA";
                     String fl = inf.substring(6,14);//瞬时流量
+                    if(fl.equals("ffff0000")){
+                        fl="0";
+                    }
                     Integer flow = Integer.parseInt(fl, 16);
                     tskB.setFlow((float) (flow/1000.0));
                     String sfld = inf.substring(14,22);//累积低位
