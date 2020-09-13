@@ -42,6 +42,7 @@ public class SaveTaskbTask {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(d1);
         String saveKey = ICL.SAVE_KEY+ICL.DIV_D+Tools.getSplitZu(cal);
+        log.info("开始保存作业记录，saveKey："+saveKey);
         doSaveDB(saveKey);
     }
     public void doSaveDB(String currKey) {

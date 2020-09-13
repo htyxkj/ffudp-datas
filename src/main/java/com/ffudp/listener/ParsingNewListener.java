@@ -191,12 +191,12 @@ public class ParsingNewListener implements MessageListener {
                 String s1 = str.substring(index,idx2);
                 str = str.substring(idx2);//0104;
                 //chaifen s1
-                if (s1.length()>=50){
+                if (s1.length()>=48){
                     //数据完整
                     taskB = getFlowData(taskB, str);
                 }
             }else{
-                if (str.length()>=50){
+                if (str.length()>=48){
                     //数据完整
                     taskB = getFlowData(taskB, str);
                 }
@@ -254,7 +254,7 @@ public class ParsingNewListener implements MessageListener {
     //生成传感器 TaskB
     public static ObTaskB getFlowData(ObTaskB tskB, String inf){
         try {
-            if(inf.length()>=50) {
+            if(inf.length()>=48) {
                 try {
                     if(inf.indexOf(prefix)==0){//字头
                         log.info("开始解析传感器数据："+inf);
@@ -305,7 +305,7 @@ public class ParsingNewListener implements MessageListener {
     }
 
     public static void main(String[] args) {
-        String str = "040314000000000000105400000000ffffffff0001ffff936c";
+        String str = "040314000000000000713f0000000000000000000000003f";
         ObTaskB taskB = new ObTaskB();
         getFlowData(taskB,str);
     }
