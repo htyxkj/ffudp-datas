@@ -6,10 +6,10 @@ import com.ffudp.cl.ICL;
 import com.ffudp.dao.DBInvoke;
 import com.ffudp.dbo.ObTaskB;
 import com.ffudp.dbo.UdpDataInfo;
+import com.ffudp.utils.DateUtils;
 import com.ffudp.utils.Tools;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -47,8 +47,8 @@ public class ParsingNewListener implements MessageListener {
             String inf = new String(bs);
             if(!StringUtils.isEmpty(inf)) {
                 inf = inf.substring(1, inf.length()-1);
-                byte[] cc  = Base64.getDecoder().decode(inf.getBytes());
-                inf = new String(cc);
+                byte[] bb = Base64.getDecoder().decode(inf.getBytes());
+                inf = new String(bb);
                 log.info("获取到数据:"+inf);
                 inf = inf.replaceAll("\n","");
                 inf = inf.replaceAll("\r","");
@@ -117,7 +117,7 @@ public class ParsingNewListener implements MessageListener {
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
-                        info.bs = str.getBytes();
+                        info.bs = hexStr2Byte(s0);
                     }else{
                         info.typeStr = "OTH";
                         info.strInfo = "OTH";
@@ -129,7 +129,7 @@ public class ParsingNewListener implements MessageListener {
                     info.tmid = d1;
                     info.speedtime = tskB.getSpeedtime();
                     info.datetime = new Date();
-
+                    info.dmt = DateUtils.parseDateToStr("yyyy-MM-dd HH:mm:ss",new Date(d1));
                     if(_info.length()>index){
                         _info = _info.substring(index+1);
                     }
@@ -149,6 +149,7 @@ public class ParsingNewListener implements MessageListener {
     //解析GPS数据
     public ObTaskB makeGPSData(String s0,ObTaskB taskB){
         if(!StringUtils.isEmpty(s0)){
+            log.info("开始解析GPS数据："+s0);
 //          G{1F}1591780157000{1F}863284044714018{1F}#IMEI:863284044714018 Time:2020-06-10 17:09:17 LNG:113.853472E LAT:22.585746N ALT:26.000000 SPEED:0.048152
             s0 = s0.substring(1);//去掉#号
             int _idx = s0.indexOf(" ");
@@ -181,8 +182,7 @@ public class ParsingNewListener implements MessageListener {
     public ObTaskB makeInfoData(String s0,ObTaskB taskB){
 //        C{1F}1591780499000{1F}863284044714018{1F}{01}{02}{03}{04}{05}{06}{07}{08}{09}{1E}
 //        byte[] bs = hexStr2Byte(s0);
-        byte[] bs = s0.getBytes();
-        String str = bytesToHexString(bs);
+        String str = s0;
         int index = str.indexOf(prefix);
         while(index>-1){
             int idx2 = str.indexOf(prefix,index ==0?1:index);//获取第二个开头;

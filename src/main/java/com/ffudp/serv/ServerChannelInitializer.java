@@ -22,8 +22,8 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
     }
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
-        channel.pipeline().addLast("decoder",new StringDecoder(CharsetUtil.UTF_8));
-        channel.pipeline().addLast("encoder",new StringEncoder(CharsetUtil.UTF_8));
+//        channel.pipeline().addLast("decoder",new StringDecoder(CharsetUtil.UTF_8));
+//        channel.pipeline().addLast("encoder",new StringEncoder(CharsetUtil.UTF_8));
         channel.pipeline().addLast(new ServerHandler(publishService));
         channel.pipeline().addLast(new ReadTimeoutHandler(1, TimeUnit.DAYS));
     }
