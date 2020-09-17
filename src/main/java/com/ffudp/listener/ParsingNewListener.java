@@ -108,12 +108,12 @@ public class ParsingNewListener implements MessageListener {
                     }
                     tskB.setSbid(Long.parseLong(sbid));
                     tskB.setSpeedtime(cal.getTime());
-                    if (str.startsWith("G")) {//GPS 数据
+                    if (str.startsWith("G") || str.startsWith("\u001eG")) {//GPS 数据
                         tskB = makeGPSData(s0,tskB);
                         info.typeStr = "GPS";
                         info.type = 5;
                         info.strInfo = str;
-                    } else if (str.startsWith("C")) {//传感器 数据
+                    } else if (str.startsWith("C") || str.startsWith("\u001eC")) {//传感器 数据
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
