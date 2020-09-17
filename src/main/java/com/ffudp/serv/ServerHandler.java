@@ -4,21 +4,11 @@ import com.ffudp.cl.ICL;
 import com.ffudp.listener.ParsingNewListener;
 import com.ffudp.msg.PublishService;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.concurrent.EventExecutor;
-import io.netty.util.concurrent.EventExecutorGroup;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.ScheduledFuture;
 import lombok.extern.slf4j.Slf4j;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @Author: 729002330@qq.com
@@ -46,7 +36,6 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         buf.getBytes(0,barray);
         //将byte[]转成字符串用于打印
         List<byte[]> l1 = new ArrayList<byte[]>();
-        byte[] b1 = null;
         int i_temp = 0;
         for(int i=0;i<barray.length;i++){
             if(barray[i] == ICL.DIV_1E){
@@ -56,11 +45,15 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 }else{
                     len = i-i_temp;
                 }
-                b1 = new byte[len];
+                byte[] b1 = new byte[len];
                 System.arraycopy(barray,i_temp,b1,0,b1.length);
                 l1.add(b1);
                 i_temp = i;
             }
+        }
+        if(l1.size() == 0){
+            log.info("DIV_1E解析失败，数据条数为0");
+            log.info(((ByteBuf) msg).toString());
         }
         for(int i=0;i<l1.size();i++){
             String str1 = new String(l1.get(i));
