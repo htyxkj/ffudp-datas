@@ -48,7 +48,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 byte[] b1 = new byte[len];
                 System.arraycopy(barray,i_temp,b1,0,b1.length);
                 l1.add(b1);
-                i_temp = i;
+                i_temp = i+1;
             }
         }
         if(l1.size() == 0){

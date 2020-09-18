@@ -50,6 +50,7 @@ public class ParsingNewListener implements MessageListener {
                 byte[] bb = Base64.getDecoder().decode(inf.getBytes());
                 inf = new String(bb);
                 log.info("获取到数据:"+inf);
+                inf = inf.replaceAll("\u0004","04");
                 inf = inf.replaceAll("\n","");
                 inf = inf.replaceAll("\r","");
                 if (inf.length() > 0) {
@@ -65,15 +66,15 @@ public class ParsingNewListener implements MessageListener {
         try {
             UdpDataInfo info = new UdpDataInfo();
             info.datetime = new Date();
-            String _info = inf;
-            int index = _info.indexOf(ICL.DIV_1E);
-            while (index !=-1){
-                String str = _info.substring(0,index);
+//            String _info = inf;
+//            int index = _info.indexOf(ICL.DIV_1E);
+//            while (index !=-1){
+                String str = inf;//_info.substring(0,index);
                 String s0 = str;
                 int _idx = s0.indexOf(ICL.DIV_1F);
                 int _idx2 = s0.indexOf(ICL.DIV_1F,_idx+1);
                 if(_idx2 == -1){
-                    break;
+                    return;
                 }
                 String strTime = s0.substring(_idx+1,_idx2);//数据时间戳
                 long d1 = Long.parseLong(strTime);//数据时间
@@ -82,7 +83,7 @@ public class ParsingNewListener implements MessageListener {
                 s0 = s0.substring(_idx2+1);
                 _idx = s0.indexOf(ICL.DIV_1F);
                 if(_idx == -1){
-                    break;
+                    return;
                 }
                 String sbid = s0.substring(0,_idx);//设备编码
                 s0 = s0.substring(_idx+1);
@@ -117,6 +118,7 @@ public class ParsingNewListener implements MessageListener {
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
+                        s0.replaceAll("\u001e","");
                         info.bs = hexStr2Byte(s0);
                     }else{
                         info.typeStr = "OTH";
@@ -130,16 +132,16 @@ public class ParsingNewListener implements MessageListener {
                     info.speedtime = tskB.getSpeedtime();
                     info.datetime = new Date();
                     info.dmt = DateUtils.parseDateToStr("yyyy-MM-dd HH:mm:ss",new Date(d1));
-                    if(_info.length()>index){
-                        _info = _info.substring(index+1);
-                    }
-                    index = _info.indexOf(ICL.DIV_1E);
-                    if(_info.length()<50){
-                        index =-1;
-                    }
+//                    if(_info.length()>index){
+//                        _info = _info.substring(index+1);
+//                    }
+//                    index = _info.indexOf(ICL.DIV_1E);
+//                    if(_info.length()<50){
+//                        index =-1;
+//                    }
                 }
                 invoke.insertFFLogData(info);
-            }
+//            }
         }catch (Exception e){
             log.error("数据解析异常：",e);
             log.error(inf);
