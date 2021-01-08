@@ -180,13 +180,11 @@ public class UDPDataRepairService {
             try {
                 if(inf.indexOf(prefix)==0){//字头
                     String fl = inf.substring(6,14);//瞬时流量
-                    Integer flow = Integer.parseInt(fl, 16);
-                    tskB.setFlow((float) (flow/1000.0));
-                    String sfld = inf.substring(14,22);//累积低位
-                    Integer sumFlowD = Integer.parseInt(sfld, 16);
-                    String sflg = inf.substring(22,30);//累积高位
-                    Integer sumFlowG = Integer.parseInt(sflg, 16);
-                    tskB.setSumflow((float) ((sumFlowD+sumFlowG)/1000.0));
+                    ByteBuffer bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(fl)));
+                    tskB.setFlow(bsf.getFloat());
+                    String sfld = inf.substring(14,22);//累积流量
+                    bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(sfld)));
+                    tskB.setSumflow(bsf.getFloat());
                     String sd = inf.substring(30,34);//湿度
                     Integer humidity = Integer.parseInt(sd, 16);
                     tskB.setHumidity((float) (humidity/10.0));

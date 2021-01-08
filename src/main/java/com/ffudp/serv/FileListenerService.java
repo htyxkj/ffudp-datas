@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -131,24 +132,22 @@ public class FileListenerService {
                                 dataStr = dataStr.substring(dataStr.indexOf(prefix));
                                 if(dataStr.length()>=50) {
                                     String fl = dataStr.substring(6, 14);//瞬时流量
-                                    Integer flow = Integer.parseInt(fl, 16);
-                                    taskB.setFlow((float) (flow / 1000.0));
-                                    String sfld = dataStr.substring(14, 22);//累积低位
-                                    Integer sumFlowD = Integer.parseInt(sfld, 16);
-                                    String sflg = dataStr.substring(22, 30);//累积高位
-                                    Integer sumFlowG = Integer.parseInt(sflg, 16);
-                                    taskB.setSumflow((float) ((sumFlowD + sumFlowG) / 1000.0));
+                                    ByteBuffer bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(fl)));
+                                    taskB.setFlow(bsf.getFloat());
+                                    String sfld = dataStr.substring(14,22);//累积流量
+                                    bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(sfld)));
+                                    taskB.setSumflow(bsf.getFloat());
                                     String sd = dataStr.substring(30, 34);//湿度
-                                    Integer humidity = Integer.parseInt(sd, 16);
+                                    Integer humidity = Tools.hexStringToInt(sd, 16);
                                     taskB.setHumidity((float) (humidity/10.0));
                                     String temp = dataStr.substring(34, 38);//温度
-                                    Integer temper = Integer.parseInt(temp, 16);
+                                    Integer temper = Tools.hexStringToInt(temp, 16);
                                     taskB.setTemperature((float) (temper / 10.0));
                                     String per = dataStr.substring(38, 42);//压力
-                                    Integer press = Integer.parseInt(per, 16);
+                                    Integer press = Tools.hexStringToInt(per, 16);
                                     taskB.setPressure((float) (press / 10.0));
                                     String per2 = dataStr.substring(42,46);//压力2
-                                    Integer press2 =  Integer.parseInt(per2, 16);
+                                    Integer press2 =  Tools.hexStringToInt(per2, 16);
                                     taskB.setPressure2((float) (press2/10.0));
                                 }
                             }

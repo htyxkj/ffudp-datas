@@ -156,6 +156,15 @@ public class Tools {
         return new BigInteger(bytesToHexString(bs),16).intValue();
     }
 
+    public static Integer hexStringToInt(String str,int radix){
+        Integer num = 0;
+        try {
+            num = new BigInteger(str,radix).intValue();
+        }finally {
+            return num;
+        }
+    }
+
     public static Float bytes2Float(byte[] bs){
         return Float.intBitsToFloat(new BigInteger(bytesToHexString(hightLowTrans(bs)), 16).intValue());
 

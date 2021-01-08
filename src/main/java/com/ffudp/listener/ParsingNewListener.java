@@ -261,24 +261,24 @@ public class ParsingNewListener implements MessageListener {
                     if(inf.indexOf(prefix)==0){//字头
                         log.info("开始解析传感器数据："+inf);
                         String fl = inf.substring(6,14);//瞬时流量
-                        Integer flow = Integer.parseInt(fl, 16);
+                        Integer flow = Tools.hexStringToInt(fl, 16);
                         tskB.setFlow((float) (flow/1000.0));
                         String sfld = inf.substring(14,22);//累积低位
-                        Integer sumFlowD = Integer.parseInt(sfld, 16);
+                        Integer sumFlowD = Tools.hexStringToInt(sfld, 16);
                         String sflg = inf.substring(22,30);//累积高位
-                        Integer sumFlowG = Integer.parseInt(sflg, 16);
+                        Integer sumFlowG = Tools.hexStringToInt(sflg, 16);
                         tskB.setSumflow((float) ((sumFlowD+sumFlowG)/1000.0));
                         String sd = inf.substring(30,34);//湿度
-                        Integer humidity = Integer.parseInt(sd, 16);
+                        Integer humidity = Tools.hexStringToInt(sd, 16);
                         tskB.setHumidity((float) (humidity/10.0));
                         String temp = inf.substring(34,38);//温度
-                        Integer temper =  Integer.parseInt(temp, 16);
+                        Integer temper =  Tools.hexStringToInt(temp, 16);
                         tskB.setTemperature((float) (temper/10.0));
                         String per = inf.substring(38,42);//压力
-                        Integer press =  Integer.parseInt(per, 16);
+                        Integer press =  Tools.hexStringToInt(per, 16);
                         tskB.setPressure((float) (press/10.0));
                         String per2 = inf.substring(42,46);//压力2
-                        Integer press2 =  Integer.parseInt(per2, 16);
+                        Integer press2 =  Tools.hexStringToInt(per2, 16);
                         tskB.setPressure2((float) (press2/10.0));
                     }
                 } catch (Exception e) {
