@@ -118,7 +118,7 @@ public class ParsingNewListener implements MessageListener {
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
-                        s0.replaceAll("\u001e","");
+                        s0 = s0.replaceAll("\u001e","");
                         info.bs = hexStr2Byte(s0);
                     }else{
                         info.typeStr = "OTH";
@@ -182,8 +182,6 @@ public class ParsingNewListener implements MessageListener {
 
     //解析传感器数据
     public ObTaskB makeInfoData(String s0,ObTaskB taskB){
-//        C{1F}1591780499000{1F}863284044714018{1F}{01}{02}{03}{04}{05}{06}{07}{08}{09}{1E}
-//        byte[] bs = hexStr2Byte(s0);
         String str = s0;
         int index = str.indexOf(prefix);
         while(index>-1){
@@ -261,13 +259,19 @@ public class ParsingNewListener implements MessageListener {
                     if(inf.indexOf(prefix)==0){//字头
                         log.info("开始解析传感器数据："+inf);
                         String fl = inf.substring(6,14);//瞬时流量
-                        Integer flow = Tools.hexStringToInt(fl, 16);
-                        tskB.setFlow((float) (flow/1000.0));
-                        String sfld = inf.substring(14,22);//累积低位
-                        Integer sumFlowD = Tools.hexStringToInt(sfld, 16);
-                        String sflg = inf.substring(22,30);//累积高位
-                        Integer sumFlowG = Tools.hexStringToInt(sflg, 16);
-                        tskB.setSumflow((float) ((sumFlowD+sumFlowG)/1000.0));
+//                        Integer flow = Tools.hexStringToInt(fl, 16);
+//                        tskB.setFlow((float) (flow/1000.0));
+//                        String sfld = inf.substring(14,22);//累积低位
+//                        Integer sumFlowD = Tools.hexStringToInt(sfld, 16);
+//                        String sflg = inf.substring(22,30);//累积高位
+//                        Integer sumFlowG = Tools.hexStringToInt(sflg, 16);
+//                        tskB.setSumflow((float) ((sumFlowD+sumFlowG)/1000.0));
+                        ByteBuffer bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(fl)));
+                        tskB.setFlow(bsf.getFloat());
+                        String sfld = inf.substring(14,22);//累积流量
+                        bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(sfld)));
+                        tskB.setSumflow(bsf.getFloat());
+
                         String sd = inf.substring(30,34);//湿度
                         Integer humidity = Tools.hexStringToInt(sd, 16);
                         tskB.setHumidity((float) (humidity/10.0));
