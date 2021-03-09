@@ -52,8 +52,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             }
         }
         if(l1.size() == 0){
-            log.info("DIV_1E解析失败，数据条数为0");
-            log.info(((ByteBuf) msg).toString());
+            log.info("DIV_1E解析失败，数据条数为0；barray长度："+barray.length);
+            log.info(new String(barray));
         }
         for(int i=0;i<l1.size();i++){
             String str1 = new String(l1.get(i));
