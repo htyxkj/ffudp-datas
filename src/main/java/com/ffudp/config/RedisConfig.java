@@ -83,6 +83,7 @@ public class RedisConfig {
 //        container.addMessageListener(new SubscribeListener(), new PatternTopic("dj"));
         container.addMessageListener(pListener, new PatternTopic("Parsing"));
         container.addMessageListener(pNListener, new PatternTopic("Parsing2"));
+        container.addMessageListener(pNListener, new PatternTopic("Parsing3"));
         container.addMessageListener(sListener, new PatternTopic("Save"));
         return container;
 

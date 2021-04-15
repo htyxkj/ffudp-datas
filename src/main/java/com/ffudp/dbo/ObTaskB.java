@@ -34,6 +34,9 @@ public class ObTaskB  implements Serializable {
     private float humidity;//湿度
     private float windspeed;//风速
 
+    @Transient
+    private int parsingNum = 0;//解析次数 判断是否对gps 传感器都解析过
+
     public float getHumidity() {
         return humidity;
     }
@@ -173,7 +176,6 @@ public class ObTaskB  implements Serializable {
     public void setDirection(String direction) {
         this.direction = direction;
     }
-
     @Override
     public String toString() {
         return "ObTaskB{" +
@@ -193,5 +195,13 @@ public class ObTaskB  implements Serializable {
                 ", direction='" + direction + '\'' +
                 ", datetime=" + datetime +
                 '}';
+    }
+
+    public int getParsingNum() {
+        return parsingNum;
+    }
+
+    public void setParsingNum(int parsingNum) {
+        this.parsingNum = parsingNum;
     }
 }

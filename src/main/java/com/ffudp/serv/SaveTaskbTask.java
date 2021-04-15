@@ -94,9 +94,40 @@ public class SaveTaskbTask {
                 pk.setSpeedtime(tskB.getSpeedtime());
                 boolean oo = invoke.exits( pk );
                 if(oo){
-                    return null;
+//                    return null;
+//                    if(tskB.getParsingNum() == 3){//判断当前数据GPS 传感器 是否全部解析完成  3 全部解析过
+//                        return null;
+//                    }else{//当条记录在数据库中存在 但是 10分钟内只解析过一次
+                        ObTaskB tskB1 =  invoke.getObTaskB(pk);
+                        log.info("当前记录数据库中存在：" + JSONObject.toJSONString(tskB1));
+                        if((tskB1.getLongitude() ==0 && tskB1.getLatitude() ==0) || tskB1.getSumflow() ==0) {
+                            if ((tskB.getParsingNum() & 1) > 0) {//解析过GPS数据
+                                if (tskB.getLatitude() != 0 && tskB.getLongitude() != 0 && tskB1.getLatitude() == 0 && tskB1.getLongitude() == 0) {
+                                    //更新GPS数据
+                                    tskB1.setLatitude(tskB.getLatitude());
+                                    tskB1.setLongitude(tskB.getLongitude());
+                                    tskB1.setSpeed(tskB.getSpeed());
+                                    tskB1.setHeight(tskB.getHeight());
+                                    tskB1.setDirection(tskB.getDirection());
+                                }
+                            }
+                            if ((tskB.getParsingNum() & 2) > 0) {//解析过传感器数据
+                                if (tskB.getSumflow() != 0 && tskB1.getSumflow() == 0) {
+                                    tskB1.setFlow(tskB.getFlow());
+                                    tskB1.setSumflow(tskB.getSumflow());
+                                    tskB1.setTemperature(tskB.getTemperature());
+                                    tskB1.setPressure2(tskB.getPressure2());
+                                    tskB1.setPressure(tskB.getPressure());
+                                    tskB1.setHumidity(tskB.getHumidity());
+                                    tskB1.setWindspeed(tskB.getWindspeed());
+                                }
+                            }
+                            log.info("修正后数据：" + JSONObject.toJSONString(tskB1));
+                            return tskB1;
+                        }
+                        return null;
+//                    }
                 }
-                log.info(tskB.toString());
                 return tskB;
             } else {
                 return null;

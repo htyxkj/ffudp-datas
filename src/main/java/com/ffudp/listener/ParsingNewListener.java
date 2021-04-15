@@ -49,12 +49,14 @@ public class ParsingNewListener implements MessageListener {
                 inf = inf.substring(1, inf.length()-1);
                 byte[] bb = Base64.getDecoder().decode(inf.getBytes());
                 inf = new String(bb);
-                log.info("获取到数据:"+inf);
+//                log.info("获取到数据:{}",inf);
                 inf = inf.replaceAll("\u0004","04");
-                inf = inf.replaceAll("\n","");
-                inf = inf.replaceAll("\r","");
-                if (inf.length() > 0) {
-                    parsing(inf);
+                String[] cc = inf.split("\u001e");
+                for (String ss:cc) {
+                    inf = ss;
+                    if (inf.length() > 0) {
+                        parsing(inf);
+                    }
                 }
             }
         }catch (Exception e){
@@ -114,12 +116,14 @@ public class ParsingNewListener implements MessageListener {
                         info.typeStr = "GPS";
                         info.type = 5;
                         info.strInfo = str;
+                        tskB.setParsingNum(tskB.getParsingNum()|1);
                     } else if (str.startsWith("C") || str.startsWith("\u001eC")) {//传感器 数据
                         tskB = makeInfoData(s0,tskB);
                         info.typeStr = "DATA-INFO";
                         info.type = 8;
                         s0 = s0.replaceAll("\u001e","");
                         info.bs = hexStr2Byte(s0);
+                        tskB.setParsingNum(tskB.getParsingNum()|2);
                     }else{
                         info.typeStr = "OTH";
                         info.strInfo = "OTH";
@@ -151,7 +155,7 @@ public class ParsingNewListener implements MessageListener {
     //解析GPS数据
     public ObTaskB makeGPSData(String s0,ObTaskB taskB){
         if(!StringUtils.isEmpty(s0)){
-            log.info("开始解析GPS数据："+s0);
+//            log.info("开始解析GPS数据："+s0);
 //          G{1F}1591780157000{1F}863284044714018{1F}#IMEI:863284044714018 Time:2020-06-10 17:09:17 LNG:113.853472E LAT:22.585746N ALT:26.000000 SPEED:0.048152
             s0 = s0.substring(1);//去掉#号
             int _idx = s0.indexOf(" ");
@@ -257,7 +261,7 @@ public class ParsingNewListener implements MessageListener {
             if(inf.length()>=48) {
                 try {
                     if(inf.indexOf(prefix)==0){//字头
-                        log.info("开始解析传感器数据："+inf);
+//                        log.info("开始解析传感器数据："+inf);
                         String fl = inf.substring(6,14);//瞬时流量
 //                        Integer flow = Tools.hexStringToInt(fl, 16);
 //                        tskB.setFlow((float) (flow/1000.0));
@@ -311,9 +315,16 @@ public class ParsingNewListener implements MessageListener {
     }
 
     public static void main(String[] args) {
-        String str = "040314000000000000713f0000000000000000000000003f";
+        String str = "04031400000000bd4c413f000000000264003f00000000b0ad";
+//        String str = "04031400000000BD4C41F0000000000264008700000000B0AD";
+//        String str = "04031420202020E7B583413F202020200264203F20202020E7A28D";
         ObTaskB taskB = new ObTaskB();
-        getFlowData(taskB,str);
+//        getFlowData(taskB,str);
+
+        ByteBuffer bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(str)));
+        String sfld = str.substring(14,22);//累积流量
+        bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(sfld)));
+        System.out.println(bsf.getFloat());
     }
 
     public static final String bytesToHexString(byte[] bArray) {

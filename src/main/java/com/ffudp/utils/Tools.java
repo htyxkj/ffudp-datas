@@ -3,6 +3,7 @@ package com.ffudp.utils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
 /**
@@ -211,4 +212,14 @@ public class Tools {
         float f1 = b.setScale(size, BigDecimal.ROUND_HALF_UP).floatValue();;
         return f1;
     }
+
+    public static String getString(byte[] array){
+        return getString(array,0,array.length);
+    }
+
+    public static String getString(byte[] array, int position, int limit) {
+        return new String(array, position, limit, StandardCharsets.UTF_8);
+    }
+
+
 }
