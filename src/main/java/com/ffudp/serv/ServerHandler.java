@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.ByteBuffer;
@@ -38,6 +39,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             byte[] barray = new byte[buf.readableBytes()];
             //把数据从bytebuf转移到byte[]
             buf.getBytes(0,barray);
+            ReferenceCountUtil.release(buf);
             //将byte[]转成字符串用于打印
             List<byte[]> l1 = new ArrayList<byte[]>();
             int i_temp = 0;

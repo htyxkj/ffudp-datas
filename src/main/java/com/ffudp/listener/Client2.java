@@ -17,8 +17,8 @@ import java.nio.ByteBuffer;
 public class Client2 {
 //        static String  host = "192.168.3.200";
 //        static String  host = "192.168.3.5";
-        static String  host = "211.144.37.205";
-//        static String  host = "127.0.0.1";
+//        static String  host = "211.144.37.205";
+        static String  host = "127.0.0.1";
 //        static String  host = "http://htyxkj08.vaiwan.com/";
     static int port = 55685;
     private static InputStreamReader isr = null;
