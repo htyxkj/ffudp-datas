@@ -8,4 +8,6 @@ public class ICL {
     public final static String SAVE_KEY = "SAVE_";
     public final static char DIV_1F = (char) 0x1F;
     public final static char DIV_1E = (char) 0x1E;
+    public final static char DIV_0D = (char) 0x0D;
+    public final static char DIV_0A = (char) 0x0A;
 }

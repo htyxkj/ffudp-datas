@@ -26,8 +26,12 @@ public class NettyServer {
 //            ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class)
 //                    .localAddress(address).childHandler(new ServerChannelInitializer(publishService)).option(ChannelOption.SO_BACKLOG, 128)
 //                    .childOption(ChannelOption.SO_KEEPALIVE,true);
-            ServerBootstrap bootstrap = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class)
-                    .localAddress(address).childHandler(new ServerChannelInitializer(publishService)).option(ChannelOption.SO_BACKLOG, 1024)
+            ServerBootstrap bootstrap = new ServerBootstrap()
+                    .group(bossGroup,workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .localAddress(address)
+                    .childHandler(new ServerChannelInitializer(publishService))
+                    .option(ChannelOption.SO_BACKLOG, 1024)
                     .childOption(ChannelOption.SO_KEEPALIVE,true);
 //            bootstrap.option(ChannelOption.SO_SNDBUF, 16*1024)
 //                    .option(ChannelOption.SO_RCVBUF, 16*1024);

@@ -36,6 +36,8 @@ public class ObTaskB  implements Serializable {
 
     @Transient
     private int parsingNum = 0;//解析次数 判断是否对gps 传感器都解析过
+    @Transient
+    private int data_type = 1;//1正常数据 0 异常数据获取的上一秒记录
 
     public float getHumidity() {
         return humidity;
@@ -158,6 +160,14 @@ public class ObTaskB  implements Serializable {
 
     public boolean isEffective() {
         return effective ==0?false:true;
+    }
+
+    public int getData_type() {
+        return data_type;
+    }
+
+    public void setData_type(int data_type) {
+        this.data_type = data_type;
     }
 
     public void setEffective(boolean effective) {

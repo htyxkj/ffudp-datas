@@ -82,6 +82,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
             ctx.flush();
+//            ctx.writeAndFlush("server响应结果");
         }catch (Exception e){
             ctx.flush();
             e.printStackTrace();

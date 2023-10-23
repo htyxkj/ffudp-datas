@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 public class Client2 {
 //        static String  host = "192.168.3.200";
 //        static String  host = "192.168.3.5";
-//        static String  host = "211.144.37.205";
+//        static String  host = "211.144.37.206";
         static String  host = "127.0.0.1";
 //        static String  host = "http://htyxkj08.vaiwan.com/";
     static int port = 55685;
@@ -45,9 +45,9 @@ public class Client2 {
             String w1 = "04031400000000BD4C41F0000000000264008700000000B0AD" ;
             long li = System.currentTimeMillis();
             System.out.println(li);
-            li = 1618073891000L;
+            li = 1618073901000L;
             ByteBuffer buffer = ByteBuffer.allocate(1023);
-            for (int i=0;i<1;i++){
+            for (int i=0;i<1000;i++){
                 byte[] b0 = new byte[1024];
                 StringBuffer sb = new StringBuffer();
                 sb.append("C").append(ICL.DIV_1F).append(li);
@@ -70,7 +70,7 @@ public class Client2 {
                 out.write(buffer.array());
     //            new PrintHelper2(socket,"客户端").start();
                 out.flush();
-                Thread.sleep(2000);
+                Thread.sleep(10000);
 
             }
             socket.close();

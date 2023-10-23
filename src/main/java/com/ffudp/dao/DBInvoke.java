@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -272,7 +273,7 @@ public class DBInvoke {
             stmt.setInt(3,info.type);
             stmt.setString(4,info.typeStr);
             stmt.setString(5,info.strInfo);
-            stmt.setString(6,info.dmt);
+            stmt.setTimestamp(6, new Timestamp(info.tmid));
             stmt.setBytes(7,info.bs);
             stmt.execute();
         }catch (Exception e){
@@ -372,4 +373,29 @@ public class DBInvoke {
             return tkid;
         }
     }
+
+    public String getConstant(String sname) {
+        String sbds = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = dataSource.getConnection();
+            String logsql = "select sbds from inssyscl where sname='"+sname+"'";
+            stmt = conn.prepareStatement(logsql);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                sbds = rs.getString(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                ConnManager.close(conn,stmt,rs);
+            }catch (Exception e){
+            }
+            return sbds;
+        }
+    }
+
 }

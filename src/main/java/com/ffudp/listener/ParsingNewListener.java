@@ -128,6 +128,40 @@ public class ParsingNewListener implements MessageListener {
                         info.typeStr = "OTH";
                         info.strInfo = "OTH";
                     }
+                    String breakey = sbid+"_BREAK_CONTINUE_NUM";
+                    //累计流量为空 取上一点流量数据
+                    if(tskB.getFlow() == 0){
+                        int nu = getBreakContinue();
+                        nu = nu *1000;
+                        if(nu >0) {
+                            long break_num = d1;
+                            //查询当前设备已经延续次数
+                            if(redisTemplate.hasKey(breakey)){
+                                Object brk_num = redisTemplate.opsForValue().get(breakey);
+                                break_num = Long.parseLong(brk_num.toString());
+                            }else{
+                                redisTemplate.opsForValue().set(breakey, d1, 500, TimeUnit.MINUTES);
+                            }
+                            if(nu>= (d1-break_num)) {
+                                String up_key = sbid + ICL.DIV_D + (d1 - 1000);
+                                if (redisTemplate.hasKey(up_key)) {
+                                    JSONObject up_info = (JSONObject) redisTemplate.opsForValue().get(up_key);
+                                    ObTaskB up_tskB = JSONObject.parseObject(up_info.toJSONString(), ObTaskB.class);
+                                    tskB.setFlow(up_tskB.getFlow());//瞬时流量
+                                    tskB.setSumflow(up_tskB.getSumflow());//累积流量
+                                    tskB.setHumidity(up_tskB.getHumidity());//湿度
+                                    tskB.setTemperature(up_tskB.getTemperature());//温度
+                                    tskB.setPressure(up_tskB.getPressure());//压力
+                                    tskB.setPressure2(up_tskB.getPressure2());//压力2
+                                    tskB.setData_type(0);
+                                }
+                            }
+                        }
+                    }else {
+                        if(tskB.getData_type() ==1){
+                            redisTemplate.delete(breakey);
+                        }
+                    }
                     redisTemplate.opsForValue().set(key0,tskB,10, TimeUnit.MINUTES);
                     if (tskB.getLatitude() != 0 && tskB.getLongitude() != 0) {
                         redisTemplate.opsForValue().set(sbid, tskB, 24, TimeUnit.HOURS);
@@ -136,19 +170,12 @@ public class ParsingNewListener implements MessageListener {
                     info.speedtime = tskB.getSpeedtime();
                     info.datetime = new Date();
                     info.dmt = DateUtils.parseDateToStr("yyyy-MM-dd HH:mm:ss",new Date(d1));
-//                    if(_info.length()>index){
-//                        _info = _info.substring(index+1);
-//                    }
-//                    index = _info.indexOf(ICL.DIV_1E);
-//                    if(_info.length()<50){
-//                        index =-1;
-//                    }
                 }
                 invoke.insertFFLogData(info);
 //            }
         }catch (Exception e){
             log.error("数据解析异常：",e);
-            log.error(inf);
+            log.error("异常数据："+inf);
             e.printStackTrace();
         }
     }
@@ -288,6 +315,9 @@ public class ParsingNewListener implements MessageListener {
                         String per2 = inf.substring(42,46);//压力2
                         Integer press2 =  Tools.hexStringToInt(per2, 16);
                         tskB.setPressure2((float) (press2/10.0));
+                        if(tskB.getFlow()>0){
+                            tskB.setData_type(1);//正常解析非断点延续
+                        }
                     }
                 } catch (Exception e) {
                     log.error("error:", e);
@@ -314,14 +344,46 @@ public class ParsingNewListener implements MessageListener {
         return bf.array();
     }
 
+    //获取设备断点延续次数
+    public int getBreakContinue(){
+        int num = 5;
+        try {
+            String rKey = "BreakContinueNum";
+            Object num1 = redisTemplate.opsForValue().get(rKey);
+            if(num1 == null) {
+                try {
+                    num1 = invoke.getConstant("BREAKCONTINUENUM");
+                }catch (Exception e){
+                }
+                if(num1 == null || num1.equals("")){//空/空串
+                    num = 0;
+                }else {
+                    redisTemplate.opsForValue().set(rKey, num1, 5, TimeUnit.MINUTES);
+                    num = Integer.parseInt(num1.toString());
+                }
+            }else{
+                num = Integer.parseInt(num1.toString());
+            }
+            return num;
+        }catch (Exception e){
+            e.printStackTrace();
+            return num;
+        }
+    }
+
+
     public static void main(String[] args) {
         String str = "04031400000000bd4c413f000000000264003f00000000b0ad";
+        str = "0403141E4840547FD842A100000000000000000000001012FA0000304C";
 //        String str = "04031400000000BD4C41F0000000000264008700000000B0AD";
 //        String str = "04031420202020E7B583413F202020200264203F20202020E7A28D";
         ObTaskB taskB = new ObTaskB();
 //        getFlowData(taskB,str);
 
-        ByteBuffer bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(str)));
+
+        String fl = str.substring(6,14);//瞬时流量
+        ByteBuffer bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(fl)));
+        System.out.println(bsf.getFloat());
         String sfld = str.substring(14,22);//累积流量
         bsf = ByteBuffer.wrap(Tools.hightLowTrans(Tools.hexStr2Byte(sfld)));
         System.out.println(bsf.getFloat());

@@ -56,7 +56,9 @@ public class FileListenerService {
             return;
         }
         for(int i=0;i<files.length;i++){
-            this.parsingFile(files[i]);
+            if (!files[i].isDirectory()) {
+                this.parsingFile(files[i]);
+            }
         }
     }
 
